@@ -3,3 +3,8 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.compose) apply false
 }
+
+allprojects {
+    // Relocate build directory outside of OneDrive to avoid AccessDeniedException and sync locks
+    layout.buildDirectory.set(file("C:/AndroidBuilds/${rootProject.name}/${project.name}"))
+}

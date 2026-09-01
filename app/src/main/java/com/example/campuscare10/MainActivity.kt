@@ -13,10 +13,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.campuscare10.datamodel.StaffReport
+import com.example.campuscare10.supabase.supabase
 import com.example.campuscare10.ui.theme.DashboardScreen
 import com.example.campuscare10.ui.theme.ReportDetailScreen
 import com.example.campuscare10.ui.theme.StaffReportsScreen
 import com.example.campuscare10.ui.theme.UpdateStatusScreen
+import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,29 +41,20 @@ class MainActivity : ComponentActivity() {
 fun StaffReportApp() {
     val navController = rememberNavController()
 
-    val reports = remember {
-        mutableStateListOf(
-            StaffReport(
-                1, "Broken Equipment", "Science Laboratory",
-                "Microscope is damaged and cannot be used.",
-                "Aina", "12 Aug 2026, 9:30 AM", "In Progress"
-            ),
-            StaffReport(
-                2, "Electrical Issue", "Block B, Level 2",
-                "The classroom light is flickering.",
-                "Daniel", "12 Aug 2026, 8:15 AM", "Submitted"
-            ),
-            StaffReport(
-                3, "Cleaning Request", "School Cafeteria",
-                "Spilled drink near the seating area.",
-                "Farah", "11 Aug 2026, 3:40 PM", "Completed"
-            ),
-            StaffReport(
-                4, "Furniture Damage", "Meeting Room",
-                "One chair has a broken leg.",
-                "Hafiz", "11 Aug 2026, 11:10 AM", "Submitted"
-            )
-        )
+    var reports by remember { mutableStateOf<List<StaffReport>>(listOf())}
+    val scope = rememberCoroutineScope()
+
+    // Fetch reports from Supabase when the app starts
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            try {
+                reports = supabase.from("reports")
+                    .select()
+                    .decodeList<StaffReport>()
+            } catch (e: Exception) {
+                // Handle or log connection errors if needed
+            }
+        }
     }
 
     NavHost(navController = navController, startDestination = "dashboard") {
@@ -85,11 +81,26 @@ fun StaffReportApp() {
                     report = reports[reportIndex],
                     onBack = { navController.popBackStack() },
                     onSave = { newStatus ->
-                        reports[reportIndex] =
-                            reports[reportIndex].copy(status = newStatus)
-                        navController.navigate("detail/${reports[reportIndex].id}") {
-                            popUpTo("detail/${reports[reportIndex].id}") {
-                                inclusive = true
+                        scope.launch {
+                            try {
+                                withContext(Dispatchers.IO) {
+                                    supabase.from("reports").update({
+                                        set("status", newStatus)
+                                    }) {
+                                        filter { eq("id", reportId!!) }
+                                    }
+                                }
+                                // Update local state after successful database write
+                                reports = reports.mapIndexed { index, report ->
+                                    if (index == reportIndex) report.copy(status = newStatus) else report
+                                }
+                                navController.navigate("detail/${reports[reportIndex].id}") {
+                                    popUpTo("detail/${reports[reportIndex].id}") {
+                                        inclusive = true
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                // Handle error here if needed
                             }
                         }
                     }

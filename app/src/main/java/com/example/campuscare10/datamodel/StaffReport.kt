@@ -1,14 +1,17 @@
 package com.example.campuscare10.datamodel
 
 import androidx.compose.ui.graphics.Color
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class StaffReport(
     val id: Int,
     val category: String,
     val location: String,
     val description: String,
-    val submittedBy: String,
-    val submittedTime: String,
+    @SerialName("submitted_by") val submittedBy: String,
+    @SerialName("submitted_time") val submittedTime: String,
     val status: String
 )
 

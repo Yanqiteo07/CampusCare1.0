@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    kotlin("plugin.serialization") version "2.2.21"
 }
 
 android {
@@ -53,4 +54,15 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation("androidx.navigation:navigation-compose:2.8.5")
     implementation("androidx.compose.material:material-icons-extended")
+
+
+    // Supabase Kotlin client (BOM manages all module versions)
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.5.0"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+
+    // HTTP engine required by supabase-kt
+    implementation("io.ktor:ktor-client-android:3.0.3")
+
+    // Coroutines for background threading
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 }
