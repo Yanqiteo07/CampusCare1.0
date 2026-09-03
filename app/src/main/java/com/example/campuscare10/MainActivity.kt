@@ -1,6 +1,9 @@
 package com.example.campuscare10
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
@@ -19,14 +22,11 @@ import com.example.campuscare10.ui.theme.ReportDetailScreen
 import com.example.campuscare10.ui.theme.StaffReportsScreen
 import com.example.campuscare10.ui.theme.UpdateStatusScreen
 import io.github.jan.supabase.postgrest.from
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             MaterialTheme(
                 colorScheme = lightColorScheme(primary = Color(0xFF348C2C))
@@ -40,20 +40,21 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun StaffReportApp() {
     val navController = rememberNavController()
+    val reports = remember { mutableStateListOf<StaffReport>() }
+    val coroutineScope = rememberCoroutineScope()
 
-    var reports by remember { mutableStateOf<List<StaffReport>>(listOf())}
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // Fetch reports from Supabase when the app starts
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            try {
-                reports = supabase.from("reports")
-                    .select()
-                    .decodeList<StaffReport>()
-            } catch (e: Exception) {
-                // Handle or log connection errors if needed
-            }
+        try {
+            val fetchedReports = supabase.from("reports").select().decodeList<StaffReport>()
+            Log.d("Supabase", "Fetched ${fetchedReports.size} reports")
+            reports.clear()
+            reports.addAll(fetchedReports)
+        } catch (e: Exception) {
+            Log.e("Supabase", "Error fetching reports", e)
+            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -67,7 +68,6 @@ fun StaffReportApp() {
         composable("detail/{reportId}") { entry ->
             val reportId = entry.arguments?.getString("reportId")?.toIntOrNull()
             val report = reports.find { it.id == reportId }
-
             if (report != null) {
                 ReportDetailScreen(report, navController)
             }
@@ -80,27 +80,21 @@ fun StaffReportApp() {
                 UpdateStatusScreen(
                     report = reports[reportIndex],
                     onBack = { navController.popBackStack() },
-                    onSave = { newStatus ->
-                        scope.launch {
-                            try {
-                                withContext(Dispatchers.IO) {
-                                    supabase.from("reports").update({
-                                        set("status", newStatus)
-                                    }) {
-                                        filter { eq("id", reportId!!) }
-                                    }
-                                }
-                                // Update local state after successful database write
-                                reports = reports.mapIndexed { index, report ->
-                                    if (index == reportIndex) report.copy(status = newStatus) else report
-                                }
-                                navController.navigate("detail/${reports[reportIndex].id}") {
-                                    popUpTo("detail/${reports[reportIndex].id}") {
-                                        inclusive = true
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                // Handle error here if needed
+                    onSave = { updatedCategory: String, newStatus: String, newRating: Float, newNote: String?, newImageUri: String? ->
+                        // Update local state list immediately
+                        val updatedReport = reports[reportIndex].copy(
+                            category = updatedCategory,
+                            status = newStatus,
+                            rating = newRating,
+                            note = newNote,
+                            imageUri = newImageUri
+                        )
+                        reports[reportIndex] = updatedReport
+                        Log.d("State", "Local state updated for report ${updatedReport.id}")
+                        
+                        navController.navigate("detail/${updatedReport.id}") {
+                            popUpTo("detail/${updatedReport.id}") {
+                                inclusive = true
                             }
                         }
                     }
@@ -108,9 +102,4 @@ fun StaffReportApp() {
             }
         }
     }
-}
-
-@Composable
-fun ReportsScreen(x0: SnapshotStateList<StaffReport>, x1: NavHostController) {
-    TODO("Not yet implemented")
 }

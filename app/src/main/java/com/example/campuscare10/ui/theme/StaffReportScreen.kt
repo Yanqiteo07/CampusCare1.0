@@ -1,21 +1,26 @@
 package com.example.campuscare10.ui.theme
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.campuscare10.datamodel.StaffReport
 import com.example.campuscare10.datamodel.statusColor
+import coil.compose.AsyncImage
 
 @Composable
 fun DashboardScreen(reports: List<StaffReport>, navController: NavController) {
@@ -172,11 +177,15 @@ fun ReportCard(report: StaffReport, onClick: () -> Unit) {
 }
 
 @Composable
-fun ReportDetailScreen(report: StaffReport, navController: NavController) {
+fun ReportDetailScreen(
+    report: StaffReport,
+    navController: NavController
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -202,11 +211,20 @@ fun ReportDetailScreen(report: StaffReport, navController: NavController) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp),
+                .height(180.dp),
             border = BorderStroke(1.dp, Color(0xFFE0E0E0))
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                Text("Photo")
+                if (!report.imageUri.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = Uri.parse(report.imageUri),
+                        contentDescription = "Uploaded Report Photo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text("No Photo Uploaded")
+                }
             }
         }
 
@@ -221,7 +239,12 @@ fun ReportDetailScreen(report: StaffReport, navController: NavController) {
         DetailItem("Report ID", "#${report.id}")
         DetailItem("Category", report.category)
 
-        Spacer(Modifier.weight(1f))
+        if (!report.note.isNullOrBlank()) {
+            DetailItem("Admin Note", report.note)
+        }
+        DetailItem("Rating", "${report.rating} / 5.0")
+
+        Spacer(Modifier.height(24.dp))
         Button(
             onClick = { navController.navigate("update/${report.id}") },
             modifier = Modifier.fillMaxWidth()
@@ -236,89 +259,6 @@ fun DetailItem(label: String, value: String) {
     Column(modifier = Modifier.padding(vertical = 5.dp)) {
         Text(label, style = MaterialTheme.typography.labelSmall)
         Text(value, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-@Composable
-fun UpdateStatusScreen(
-    report: StaffReport,
-    onBack: () -> Unit,
-    onSave: (String) -> Unit
-) {
-    var category by remember { mutableStateOf(report.category) }
-    var selectedStatus by remember { mutableStateOf(report.status) }
-    var note by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                "‹",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier
-                    .padding(end = 22.dp)
-                    .clickable { onBack() }
-            )
-            Text("Update Status", fontWeight = FontWeight.Bold)
-        }
-
-        Spacer(Modifier.height(18.dp))
-        Text("Category", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(6.dp))
-        StatusDropdown(category, listOf(
-            "Broken Equipment", "Electrical Issue", "Cleaning Request", "Furniture Damage"
-        )) { category = it }
-
-        Spacer(Modifier.height(18.dp))
-        Text("Update to", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            border = BorderStroke(1.dp, Color(0xFFE5E5E5))
-        ) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                listOf("Under Review", "In Progress", "Completed").forEach { status ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { selectedStatus = status }
-                            .padding(vertical = 4.dp)
-                    ) {
-                        RadioButton(
-                            selected = selectedStatus == status,
-                            onClick = { selectedStatus = status }
-                        )
-                        Text(status)
-                    }
-                }
-            }
-        }
-
-        Spacer(Modifier.height(18.dp))
-        Text("Note (Optional)", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(6.dp))
-        OutlinedTextField(
-            value = note,
-            onValueChange = { note = it },
-            placeholder = { Text("Add internal note...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(130.dp)
-        )
-
-        Spacer(Modifier.weight(1f))
-        Button(
-            onClick = { onSave(selectedStatus) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Save Changes")
-        }
     }
 }
 
