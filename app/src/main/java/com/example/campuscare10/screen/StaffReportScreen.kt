@@ -1,4 +1,4 @@
-package com.example.campuscare10.ui.theme
+package com.example.campuscare10.screen
 
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
@@ -116,7 +116,7 @@ fun OverviewCard(title: String, count: String, color: Color, modifier: Modifier 
 @Composable
 fun StaffReportsScreen(reports: List<StaffReport>, navController: NavController) {
     var selectedStatus by remember { mutableStateOf("All Status") }
-    val statuses = listOf("All Status", "Submitted", "In Progress", "Completed")
+    val statuses = listOf("All Status", "Submitted", "Under Review", "In Progress", "Completed")
 
     val filteredReports = reports.filter {
         selectedStatus == "All Status" || it.status == selectedStatus
@@ -173,92 +173,6 @@ fun ReportCard(report: StaffReport, onClick: () -> Unit) {
                 fontWeight = FontWeight.Bold
             )
         }
-    }
-}
-
-@Composable
-fun ReportDetailScreen(
-    report: StaffReport,
-    navController: NavController
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                "‹",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier
-                    .padding(end = 22.dp)
-                    .clickable { navController.popBackStack() }
-            )
-            Text("Report Detail", fontWeight = FontWeight.Bold)
-        }
-
-        Spacer(Modifier.height(18.dp))
-        AssistChip(
-            onClick = {},
-            label = { Text(report.status) },
-            colors = AssistChipDefaults.assistChipColors(
-                labelColor = statusColor(report.status)
-            )
-        )
-
-        Spacer(Modifier.height(14.dp))
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp),
-            border = BorderStroke(1.dp, Color(0xFFE0E0E0))
-        ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                if (!report.imageUri.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = Uri.parse(report.imageUri),
-                        contentDescription = "Uploaded Report Photo",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Text("No Photo Uploaded")
-                }
-            }
-        }
-
-        Spacer(Modifier.height(18.dp))
-        Text("Report Detail", fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(10.dp))
-
-        DetailItem("Location", report.location)
-        DetailItem("Description", report.description)
-        DetailItem("Submitted by", report.submittedBy)
-        DetailItem("Submitted time", report.submittedTime)
-        DetailItem("Report ID", "#${report.id}")
-        DetailItem("Category", report.category)
-
-        if (!report.note.isNullOrBlank()) {
-            DetailItem("Admin Note", report.note)
-        }
-        DetailItem("Rating", "${report.rating} / 5.0")
-
-        Spacer(Modifier.height(24.dp))
-        Button(
-            onClick = { navController.navigate("update/${report.id}") },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Update Status")
-        }
-    }
-}
-
-@Composable
-fun DetailItem(label: String, value: String) {
-    Column(modifier = Modifier.padding(vertical = 5.dp)) {
-        Text(label, style = MaterialTheme.typography.labelSmall)
-        Text(value, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

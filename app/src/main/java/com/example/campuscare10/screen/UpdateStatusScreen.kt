@@ -1,4 +1,4 @@
-package com.example.campuscare10.ui.theme
+package com.example.campuscare10.screen
 
 import android.net.Uri
 import android.util.Log
@@ -27,7 +27,10 @@ import coil.compose.AsyncImage
 import com.example.campuscare10.datamodel.StaffReport
 import com.example.campuscare10.supabase.supabase
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.storage.storage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Serializable
 data class ReportUpdate(
@@ -49,6 +52,7 @@ fun UpdateStatusScreen(
     var rating by remember { mutableFloatStateOf(report.rating) }
     var note by remember { mutableStateOf(report.note ?: "") }
     var imageUri by remember { mutableStateOf(report.imageUri) }
+    var isUploading by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -81,9 +85,11 @@ fun UpdateStatusScreen(
         Spacer(Modifier.height(18.dp))
         Text("Category", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(6.dp))
-        StatusDropdown(category, listOf(
-            "Broken Equipment", "Electrical Issue", "Cleaning Request", "Furniture Damage"
-        )) { category = it }
+        StatusDropdown(
+            category, listOf(
+                "Broken Equipment", "Electrical Issue", "Cleaning Request", "Furniture Damage"
+            )
+        ) { category = it }
 
         Spacer(Modifier.height(18.dp))
         Text("Upload Photo", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
@@ -105,6 +111,9 @@ fun UpdateStatusScreen(
                     )
                 } else {
                     Text("Tap to upload photo")
+                }
+                if (isUploading) {
+                    CircularProgressIndicator()
                 }
             }
         }
@@ -175,15 +184,39 @@ fun UpdateStatusScreen(
         Button(
             onClick = {
                 coroutineScope.launch {
-                    val updateData = ReportUpdate(
-                        category = category,
-                        status = selectedStatus,
-                        rating = rating,
-                        note = note.ifBlank { null },
-                        imageUri = imageUri
-                    )
-
+                    isUploading = true
                     try {
+                        var finalImageUri = imageUri
+                        
+                        // If it's a local URI (picked from gallery), upload it to Supabase
+                        if (imageUri != null && imageUri!!.startsWith("content://")) {
+                            val uri = Uri.parse(imageUri)
+                            val bytes = withContext(Dispatchers.IO) {
+                                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                            }
+                            
+                            if (bytes != null) {
+                                val fileName = "report_${report.id}_${System.currentTimeMillis()}.jpg"
+                                val bucket = supabase.storage.from("report_photo")
+                                
+                                Log.d("Supabase", "Uploading image: $fileName")
+                                bucket.upload(fileName, bytes) {
+                                    upsert = true
+                                }
+                                
+                                finalImageUri = bucket.publicUrl(fileName)
+                                Log.d("Supabase", "Image uploaded successfully. Public URL: $finalImageUri")
+                            }
+                        }
+
+                        val updateData = ReportUpdate(
+                            category = category,
+                            status = selectedStatus,
+                            rating = rating,
+                            note = note.ifBlank { null },
+                            imageUri = finalImageUri
+                        )
+
                         Log.d("Supabase", "Attempting to update report ${report.id} with data: $updateData")
                         supabase.from("reports").update(updateData) {
                             filter {
@@ -193,20 +226,28 @@ fun UpdateStatusScreen(
                         Log.d("Supabase", "Successfully updated report ${report.id} in Supabase")
                         
                         // Show success toast on main thread
-                        coroutineScope.launch {
+                        withContext(Dispatchers.Main) {
                             Toast.makeText(context, "Update successful!", Toast.LENGTH_SHORT).show()
-                            onSave(category, selectedStatus, rating, note, imageUri)
+                            onSave(category, selectedStatus, rating, note, finalImageUri)
                         }
                     } catch (e: Exception) {
                         Log.e("Supabase", "Error updating report ${report.id}", e)
-                        e.printStackTrace()
-                        Toast.makeText(context, "Update failed: ${e.message}", Toast.LENGTH_LONG).show()
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, "Update failed: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    } finally {
+                        isUploading = false
                     }
                 }
             },
+            enabled = !isUploading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Save Changes")
+            if (isUploading) {
+                Text("Uploading...")
+            } else {
+                Text("Save Changes")
+            }
         }
     }
 }
