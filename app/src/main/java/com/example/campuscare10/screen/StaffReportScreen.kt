@@ -44,7 +44,7 @@ fun DashboardScreen(reports: List<StaffReport>, navController: NavController) {
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = {},
+                    onClick = { navController.navigate("equipment_list") },
                     icon = { Text("☰") },
                     label = { Text("Equipment") }
                 )
@@ -89,7 +89,7 @@ fun DashboardScreen(reports: List<StaffReport>, navController: NavController) {
 
             Spacer(Modifier.weight(1f))
             Button(
-                onClick = {},
+                onClick = { navController.navigate("add_equipment") },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("+ Add New Equipment")
@@ -127,7 +127,7 @@ fun StaffReportsScreen(reports: List<StaffReport>, navController: NavController)
             NavigationBar {
                 NavigationBarItem(false, { navController.navigate("dashboard") }, { Text("⌂") }, label = { Text("Home") })
                 NavigationBarItem(true, {}, { Text("▤") }, label = { Text("Reports") })
-                NavigationBarItem(false, {}, { Text("☰") }, label = { Text("Equipment") })
+                NavigationBarItem(false, { navController.navigate("equipment_list") }, { Text("☰") }, label = { Text("Equipment") })
                 NavigationBarItem(false, {}, { Text("◉") }, label = { Text("Profile") })
             }
         }
