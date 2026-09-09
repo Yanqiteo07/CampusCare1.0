@@ -166,11 +166,11 @@ fun EquipmentListScreen(
                         key = { it.id ?: 0L }
                     ) { equipment ->
                         EquipmentRow(
-                            equipment = equipment,
-                            onClick = {
-                                // Implement detail navigation if needed
-                            }
-                        )
+                        equipment = equipment,
+                        onClick = {
+                            navController.navigate("equipment_detail/${equipment.id}")
+                        }
+                    )
                     }
                 }
             }

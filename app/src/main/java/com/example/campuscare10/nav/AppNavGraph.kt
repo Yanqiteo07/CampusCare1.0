@@ -54,6 +54,18 @@ fun AppNavGraph(
         composable("add_equipment") {
             AddEquipmentScreen(navController)
         }
+        composable("equipment_detail/{equipmentId}") { entry ->
+            val equipmentId = entry.arguments?.getString("equipmentId")?.toLongOrNull()
+            if (equipmentId != null) {
+                EquipmentDetailScreen(navController, equipmentId)
+            }
+        }
+        composable("edit_equipment/{equipmentId}") { entry ->
+            val equipmentId = entry.arguments?.getString("equipmentId")?.toLongOrNull()
+            if (equipmentId != null) {
+                EditEquipmentScreen(navController, equipmentId)
+            }
+        }
         composable("detail/{reportId}") { entry ->
             val reportId = entry.arguments?.getString("reportId")?.toIntOrNull()
             val report = reports.find { it.id == reportId }
