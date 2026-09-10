@@ -18,20 +18,6 @@ import io.github.jan.supabase.postgrest.from
 fun StaffReportApp() {
     val navController = rememberNavController()
     val reports = remember { mutableStateListOf<StaffReport>() }
-    val context = LocalContext.current
-
-    // Fetch reports from Supabase when the app starts
-    LaunchedEffect(Unit) {
-        try {
-            val fetchedReports = supabase.from("reports").select().decodeList<StaffReport>()
-            Log.d("Supabase", "Fetched ${fetchedReports.size} reports")
-            reports.clear()
-            reports.addAll(fetchedReports)
-        } catch (e: Exception) {
-            Log.e("Supabase", "Error fetching reports", e)
-            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
 
     AppNavGraph(navController = navController, reports = reports)
 }
@@ -41,31 +27,67 @@ fun AppNavGraph(
     navController: NavHostController,
     reports: SnapshotStateList<StaffReport>
 ) {
-    NavHost(navController = navController, startDestination = "dashboard") {
+    NavHost(navController = navController, startDestination = "splash") {
+        composable("splash") {
+            SplashScreen(
+                onNavigateToStudent = { /* TODO: Student flow */ },
+                onNavigateToStaff = { navController.navigate("staff_login") }
+            )
+        }
+        
+        composable("staff_login") {
+            StaffLoginScreen(
+                onLoginSuccess = { 
+                    navController.navigate("dashboard") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
         composable("dashboard") {
+            val context = LocalContext.current
+            LaunchedEffect(Unit) {
+                try {
+                    val fetchedReports = supabase.from("reports").select().decodeList<StaffReport>()
+                    reports.clear()
+                    reports.addAll(fetchedReports)
+                    Log.d("Supabase", "Fetched ${fetchedReports.size} reports")
+                } catch (e: Exception) {
+                    Log.e("Supabase", "Error fetching reports", e)
+                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
             DashboardScreen(reports, navController)
         }
+        
         composable("reports") {
             StaffReportsScreen(reports, navController)
         }
+        
         composable("equipment_list") {
             EquipmentListScreen(navController)
         }
+        
         composable("add_equipment") {
             AddEquipmentScreen(navController)
         }
+        
         composable("equipment_detail/{equipmentId}") { entry ->
             val equipmentId = entry.arguments?.getString("equipmentId")?.toLongOrNull()
             if (equipmentId != null) {
                 EquipmentDetailScreen(navController, equipmentId)
             }
         }
+        
         composable("edit_equipment/{equipmentId}") { entry ->
             val equipmentId = entry.arguments?.getString("equipmentId")?.toLongOrNull()
             if (equipmentId != null) {
                 EditEquipmentScreen(navController, equipmentId)
             }
         }
+        
         composable("detail/{reportId}") { entry ->
             val reportId = entry.arguments?.getString("reportId")?.toIntOrNull()
             val report = reports.find { it.id == reportId }
@@ -73,6 +95,7 @@ fun AppNavGraph(
                 ReportDetailScreen(report, navController)
             }
         }
+        
         composable("update/{reportId}") { entry ->
             val reportId = entry.arguments?.getString("reportId")?.toIntOrNull()
             val reportIndex = reports.indexOfFirst { it.id == reportId }
@@ -82,7 +105,6 @@ fun AppNavGraph(
                     report = reports[reportIndex],
                     onBack = { navController.popBackStack() },
                     onSave = { updatedCategory, newStatus, newRating, newNote, newImageUri ->
-                        // Update local state list immediately
                         val updatedReport = reports[reportIndex].copy(
                             category = updatedCategory,
                             status = newStatus,
@@ -91,12 +113,8 @@ fun AppNavGraph(
                             imageUri = newImageUri
                         )
                         reports[reportIndex] = updatedReport
-                        Log.d("State", "Local state updated for report ${updatedReport.id}")
-
                         navController.navigate("detail/${updatedReport.id}") {
-                            popUpTo("detail/${updatedReport.id}") {
-                                inclusive = true
-                            }
+                            popUpTo("detail/${updatedReport.id}") { inclusive = true }
                         }
                     }
                 )
