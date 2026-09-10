@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.campuscare10.datamodel.StaffProfile
 import com.example.campuscare10.datamodel.StaffReport
 import com.example.campuscare10.screen.*
 import com.example.campuscare10.supabase.supabase
@@ -18,14 +19,22 @@ import io.github.jan.supabase.postgrest.from
 fun StaffReportApp() {
     val navController = rememberNavController()
     val reports = remember { mutableStateListOf<StaffReport>() }
+    var currentStaff by remember { mutableStateOf<StaffProfile?>(null) }
 
-    AppNavGraph(navController = navController, reports = reports)
+    AppNavGraph(
+        navController = navController,
+        reports = reports,
+        currentStaff = currentStaff,
+        onStaffLogin = { currentStaff = it }
+    )
 }
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    reports: SnapshotStateList<StaffReport>
+    reports: SnapshotStateList<StaffReport>,
+    currentStaff: StaffProfile?,
+    onStaffLogin: (StaffProfile) -> Unit
 ) {
     NavHost(navController = navController, startDestination = "splash") {
         composable("splash") {
@@ -37,7 +46,8 @@ fun AppNavGraph(
         
         composable("staff_login") {
             StaffLoginScreen(
-                onLoginSuccess = { 
+                onLoginSuccess = { staff ->
+                    onStaffLogin(staff)
                     navController.navigate("dashboard") {
                         popUpTo("splash") { inclusive = true }
                     }
@@ -72,6 +82,17 @@ fun AppNavGraph(
         
         composable("add_equipment") {
             AddEquipmentScreen(navController)
+        }
+
+        composable("staff_profile") {
+            if (currentStaff != null) {
+                StaffProfileScreen(navController, currentStaff)
+            } else {
+                // Fallback to login if staff data is missing
+                navController.navigate("staff_login") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
         }
         
         composable("equipment_detail/{equipmentId}") { entry ->

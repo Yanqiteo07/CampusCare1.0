@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun StaffLoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (StaffProfile) -> Unit,
     onBack: () -> Unit
 ) {
     var staffId by remember { mutableStateOf("") }
@@ -92,7 +92,7 @@ fun StaffLoginScreen(
 
                         if (result != null) {
                             Toast.makeText(context, "Welcome, ${result.staffId}", Toast.LENGTH_SHORT).show()
-                            onLoginSuccess()
+                            onLoginSuccess(result)
                         } else {
                             Toast.makeText(context, "Invalid Staff ID or Password", Toast.LENGTH_SHORT).show()
                         }

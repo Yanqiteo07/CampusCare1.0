@@ -50,7 +50,7 @@ fun DashboardScreen(reports: List<StaffReport>, navController: NavController) {
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = {},
+                    onClick = { navController.navigate("staff_profile") },
                     icon = { Text("◉") },
                     label = { Text("Profile") }
                 )
@@ -128,7 +128,7 @@ fun StaffReportsScreen(reports: List<StaffReport>, navController: NavController)
                 NavigationBarItem(false, { navController.navigate("dashboard") }, { Text("⌂") }, label = { Text("Home") })
                 NavigationBarItem(true, {}, { Text("▤") }, label = { Text("Reports") })
                 NavigationBarItem(false, { navController.navigate("equipment_list") }, { Text("☰") }, label = { Text("Equipment") })
-                NavigationBarItem(false, {}, { Text("◉") }, label = { Text("Profile") })
+                NavigationBarItem(false, { navController.navigate("staff_profile") }, { Text("◉") }, label = { Text("Profile") })
             }
         }
     ) { padding ->
