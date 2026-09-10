@@ -9,5 +9,6 @@ data class StaffProfile(
     val password: String,
     @SerialName("Department") val department: String? = null,
     val email: String? = null,
-    @SerialName("PhoneNumber") val phoneNumber: String? = null
+    @SerialName("PhoneNumber") val phoneNumber: String? = null,
+    @SerialName("StaffName") val staffName: String? = null
 )

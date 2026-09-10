@@ -72,7 +72,15 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
                 .padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Profile", modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { navController.navigate("dashboard") { popUpTo("dashboard") { inclusive = true } } }) {
+                    Text("‹", style = MaterialTheme.typography.headlineMedium, color = Color.Gray)
+                }
+                Text("Profile", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -80,12 +88,16 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
                 modifier = Modifier.size(80.dp).clip(CircleShape).background(lightContainerColor),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = (staff.staffId.take(2)).uppercase(), color = primaryColor, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                val displayName = staff.staffName ?: staff.staffId
+                val initials = displayName.filter { it.isUpperCase() }.let {
+                    if (it.isEmpty()) displayName.take(1).uppercase() else it.take(2)
+                }
+                Text(text = initials, color = primaryColor, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(text = staff.staffId, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(text = staff.staffName ?: staff.staffId, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Text(text = staff.email ?: "No email provided", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
 
             Spacer(modifier = Modifier.height(35.dp))

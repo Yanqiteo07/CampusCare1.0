@@ -98,7 +98,7 @@ fun EquipmentListScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 IconButton(
-                    onClick = { navController.popBackStack() }
+                    onClick = { navController.navigate("dashboard") { popUpTo("dashboard") { inclusive = true } } }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
