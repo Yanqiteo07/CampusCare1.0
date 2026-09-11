@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.campuscare10.datamodel.StudentProfile
@@ -30,9 +31,11 @@ fun StudentLoginScreen(
 
     var studentId by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var isStudentIdError by remember { mutableStateOf(false) }
-    var isPasswordError by remember { mutableStateOf(false) }
+    
+    var studentIdError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -78,15 +81,21 @@ fun StudentLoginScreen(
                     value = studentId,
                     onValueChange = { 
                         studentId = it
-                        isStudentIdError = false 
+                        studentIdError = null 
                     },
-                    label = { Text("Student ID / Email") },
+                    label = { 
+                        Text(
+                            text = studentIdError ?: "Student ID / Email",
+                            color = if (studentIdError != null) MaterialTheme.colorScheme.error else Color.Unspecified
+                        ) 
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = isStudentIdError,
+                    isError = studentIdError != null,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryPurple,
-                        errorBorderColor = Color.Red
+                        errorBorderColor = Color.Red,
+                        errorLabelColor = Color.Red
                     ),
                     singleLine = true
                 )
@@ -97,31 +106,53 @@ fun StudentLoginScreen(
                     value = password,
                     onValueChange = { 
                         password = it
-                        isPasswordError = false
+                        passwordError = null
                     },
-                    label = { Text("Password") },
+                    label = { 
+                        Text(
+                            text = passwordError ?: "Password",
+                            color = if (passwordError != null) MaterialTheme.colorScheme.error else Color.Unspecified
+                        ) 
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation(),
-                    isError = isPasswordError,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    isError = passwordError != null,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryPurple,
-                        errorBorderColor = Color.Red
+                        errorBorderColor = Color.Red,
+                        errorLabelColor = Color.Red
                     ),
                     singleLine = true
                 )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = passwordVisible,
+                        onCheckedChange = { passwordVisible = it },
+                        colors = CheckboxDefaults.colors(checkedColor = primaryPurple)
+                    )
+                    Text(text = "Show Password", style = MaterialTheme.typography.bodyMedium)
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = {
-                        if (studentId.isBlank()) isStudentIdError = true
-                        if (password.isBlank()) isPasswordError = true
+                        studentIdError = null
+                        passwordError = null
 
-                        if (studentId.isBlank() || password.isBlank()) {
-                            Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show()
-                            return@Button
+                        if (studentId.isBlank()) {
+                            studentIdError = "Field required"
                         }
+                        if (password.isBlank()) {
+                            passwordError = "Password required"
+                        }
+
+                        if (studentIdError != null || passwordError != null) return@Button
 
                         coroutineScope.launch {
                             isLoading = true
@@ -138,14 +169,12 @@ fun StudentLoginScreen(
                                     Toast.makeText(context, "Welcome, ${result.username ?: studentId}", Toast.LENGTH_SHORT).show()
                                     onLoginSuccess()
                                 } else {
-                                    isStudentIdError = true
-                                    isPasswordError = true
+                                    studentIdError = "Invalid Login"
+                                    passwordError = "Invalid Login"
                                     Toast.makeText(context, "Invalid ID or Password", Toast.LENGTH_SHORT).show()
                                 }
                             } catch (e: Exception) {
                                 Log.e("StudentLogin", "Error", e)
-                                isStudentIdError = true
-                                isPasswordError = true
                                 Toast.makeText(context, "Login Error: ${e.message}", Toast.LENGTH_SHORT).show()
                             } finally {
                                 isLoading = false

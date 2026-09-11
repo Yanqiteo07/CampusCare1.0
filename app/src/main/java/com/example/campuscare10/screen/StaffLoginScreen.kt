@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.campuscare10.datamodel.StaffProfile
@@ -26,9 +27,11 @@ fun StaffLoginScreen(
 ) {
     var staffId by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var isStaffIdError by remember { mutableStateOf(false) }
-    var isPasswordError by remember { mutableStateOf(false) }
+
+    var staffIdError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
     
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -54,15 +57,21 @@ fun StaffLoginScreen(
             value = staffId,
             onValueChange = { 
                 staffId = it
-                isStaffIdError = false
+                staffIdError = null 
             },
-            label = { Text("Staff ID") },
+            label = { 
+                Text(
+                    text = staffIdError ?: "Staff ID",
+                    color = if (staffIdError != null) MaterialTheme.colorScheme.error else Color.Unspecified
+                ) 
+            },
             modifier = Modifier.fillMaxWidth(),
-            isError = isStaffIdError,
+            isError = staffIdError != null,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = staffGreen,
-                errorBorderColor = Color.Red
+                errorBorderColor = Color.Red,
+                errorLabelColor = Color.Red
             ),
             singleLine = true
         )
@@ -73,56 +82,74 @@ fun StaffLoginScreen(
             value = password,
             onValueChange = { 
                 password = it
-                isPasswordError = false
+                passwordError = null
             },
-            label = { Text("Password") },
+            label = { 
+                Text(
+                    text = passwordError ?: "Password",
+                    color = if (passwordError != null) MaterialTheme.colorScheme.error else Color.Unspecified
+                ) 
+            },
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation(),
-            isError = isPasswordError,
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            isError = passwordError != null,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = staffGreen,
-                errorBorderColor = Color.Red
+                errorBorderColor = Color.Red,
+                errorLabelColor = Color.Red
             ),
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = passwordVisible,
+                onCheckedChange = { passwordVisible = it },
+                colors = CheckboxDefaults.colors(checkedColor = staffGreen)
+            )
+            Text(text = "Show Password", style = MaterialTheme.typography.bodyMedium)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
-                if (staffId.isBlank()) isStaffIdError = true
-                if (password.isBlank()) isPasswordError = true
+                staffIdError = null
+                passwordError = null
 
-                if (staffId.isBlank() || password.isBlank()) {
-                    Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show()
-                    return@Button
+                if (staffId.isBlank()) {
+                    staffIdError = "Staff ID required"
                 }
+                if (password.isBlank()) {
+                    passwordError = "Password required"
+                }
+
+                if (staffIdError != null || passwordError != null) return@Button
 
                 coroutineScope.launch {
                     isLoading = true
                     try {
-                        // Table name "Staffprofile" as shown in screenshot
-                        val result = supabase.from("Staffprofile")
+                        val staffRecord = supabase.from("Staffprofile")
                             .select {
                                 filter {
                                     eq("Staffid", staffId)
-                                    eq("password", password)
                                 }
                             }.decodeSingleOrNull<StaffProfile>()
 
-                        if (result != null) {
-                            Toast.makeText(context, "Welcome, ${result.staffId}", Toast.LENGTH_SHORT).show()
-                            onLoginSuccess(result)
+                        if (staffRecord == null) {
+                            staffIdError = "Wrong Staff ID"
+                        } else if (staffRecord.password != password) {
+                            passwordError = "Wrong Password"
                         } else {
-                            isStaffIdError = true
-                            isPasswordError = true
-                            Toast.makeText(context, "Invalid Staff ID or Password", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Welcome, ${staffRecord.staffName ?: staffRecord.staffId}", Toast.LENGTH_SHORT).show()
+                            onLoginSuccess(staffRecord)
                         }
                     } catch (e: Exception) {
                         Log.e("Login", "Error", e)
-                        isStaffIdError = true
-                        isPasswordError = true
                         Toast.makeText(context, "Login Error: ${e.message}", Toast.LENGTH_SHORT).show()
                     } finally {
                         isLoading = false
