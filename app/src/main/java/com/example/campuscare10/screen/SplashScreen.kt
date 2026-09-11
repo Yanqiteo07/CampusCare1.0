@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,112 +21,85 @@ fun SplashScreen(
     onNavigateToStudent: () -> Unit,
     onNavigateToStaff: () -> Unit
 ) {
-    val primaryPurple = Color(0xFF6C47FF)
+    val primaryPurple = Color(0xFF7B43FF)
     val staffGreen = Color(0xFF388E3C)
-    val backgroundTint = Color(0xFFF8F8FC)
+    val bgColor = Color(0xFFF8F8FF)
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = backgroundTint
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(bgColor)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
+        // Logo Icon
+        Icon(
+            imageVector = Icons.Default.School,
+            contentDescription = "Campus Icon",
+            modifier = Modifier.size(120.dp),
+            tint = primaryPurple
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Title
+        Text(
+            text = "CampusCare",
+            fontSize = 36.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = primaryPurple
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Taglines
+        Text(
+            text = "Report, Track, Improve.",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Together, we build\na better campus.",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        // Student Button
+        Button(
+            onClick = onNavigateToStudent,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .width(160.dp)
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = primaryPurple),
+            shape = RoundedCornerShape(8.dp)
         ) {
-            // Logo Icon Placeholder (Replace with Image if you have a drawable)
-            Box(
-                modifier = Modifier
-                    .size(80.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Home, // Change to your campus icon/drawable resource
-                    contentDescription = "Campus Logo",
-                    tint = primaryPurple,
-                    modifier = Modifier.size(64.dp)
-                )
-            }
+            Text("Student", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            // App Title
-            Text(
-                text = "CampusCare",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = primaryPurple,
-                    fontSize = 32.sp
-                )
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Subtitle Texts
-            Text(
-                text = "Report, Track, Improve.",
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    fontSize = 16.sp
-                ),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = "Together, we build\na better campus.",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color.DarkGray,
-                    fontSize = 14.sp
-                ),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Student Entry Button (Purple)
-            Button(
-                onClick = onNavigateToStudent,
-                colors = ButtonDefaults.buttonColors(containerColor = primaryPurple),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "Student",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Staff Entry Button (Green)
-            Button(
-                onClick = onNavigateToStaff,
-                colors = ButtonDefaults.buttonColors(containerColor = staffGreen),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "Staff",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-            }
+        // Staff Button
+        Button(
+            onClick = onNavigateToStaff,
+            modifier = Modifier
+                .width(160.dp)
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = staffGreen),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text("Staff", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

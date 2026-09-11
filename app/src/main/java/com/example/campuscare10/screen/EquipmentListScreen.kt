@@ -61,7 +61,7 @@ fun EquipmentListScreen(
             NavigationBar {
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("dashboard") },
+                    onClick = { navController.navigate("staff_dashboard") },
                     icon = { Text("⌂") },
                     label = { Text("Home") }
                 )
@@ -98,7 +98,7 @@ fun EquipmentListScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 IconButton(
-                    onClick = { navController.navigate("dashboard") { popUpTo("dashboard") { inclusive = true } } }
+                    onClick = { navController.navigate("staff_dashboard") { popUpTo("staff_dashboard") { inclusive = true } } }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,

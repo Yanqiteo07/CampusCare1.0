@@ -64,17 +64,23 @@ dependencies {
 
 
     // Supabase Kotlin client (BOM manages all module versions)
-    implementation(platform("io.github.jan-tennert.supabase:bom:3.5.0"))
+    implementation(platform("io.github.jan-tennert.supabase:bom:2.6.1"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:supabase-kt")
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+    implementation("io.github.jan-tennert.supabase:gotrue-kt")
 
     // HTTP engine required by supabase-kt
-    implementation("io.ktor:ktor-client-android:3.0.3")
+    implementation("io.ktor:ktor-client-android:2.3.11")
 
     // Coroutines for background threading
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation("io.github.jan-tennert.supabase:storage-kt:2.6.0")
+    
+    val nav_version = "2.8.5"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
+    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
 
 }

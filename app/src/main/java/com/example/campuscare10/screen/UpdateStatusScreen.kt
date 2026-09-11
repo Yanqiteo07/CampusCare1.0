@@ -200,9 +200,7 @@ fun UpdateStatusScreen(
                                 val bucket = supabase.storage.from("report_photo")
                                 
                                 Log.d("Supabase", "Uploading image: $fileName")
-                                bucket.upload(fileName, bytes) {
-                                    upsert = true
-                                }
+                                bucket.upload(fileName, bytes, upsert = true)
                                 
                                 finalImageUri = bucket.publicUrl(fileName)
                                 Log.d("Supabase", "Image uploaded successfully. Public URL: $finalImageUri")

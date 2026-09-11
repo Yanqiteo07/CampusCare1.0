@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.campuscare10.datamodel.StaffProfile
@@ -27,11 +26,9 @@ fun StaffLoginScreen(
 ) {
     var staffId by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-
-    var staffIdError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
+    var isStaffIdError by remember { mutableStateOf(false) }
+    var isPasswordError by remember { mutableStateOf(false) }
     
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -57,18 +54,17 @@ fun StaffLoginScreen(
             value = staffId,
             onValueChange = { 
                 staffId = it
-                staffIdError = null 
+                isStaffIdError = false
             },
             label = { Text("Staff ID") },
             modifier = Modifier.fillMaxWidth(),
+            isError = isStaffIdError,
             shape = RoundedCornerShape(12.dp),
-            singleLine = true,
-            isError = staffIdError != null,
-            supportingText = {
-                if (staffIdError != null) {
-                    Text(text = staffIdError!!, color = MaterialTheme.colorScheme.error)
-                }
-            }
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = staffGreen,
+                errorBorderColor = Color.Red
+            ),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -77,68 +73,56 @@ fun StaffLoginScreen(
             value = password,
             onValueChange = { 
                 password = it
-                passwordError = null
+                isPasswordError = false
             },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = PasswordVisualTransformation(),
+            isError = isPasswordError,
             shape = RoundedCornerShape(12.dp),
-            singleLine = true,
-            isError = passwordError != null,
-            supportingText = {
-                if (passwordError != null) {
-                    Text(text = passwordError!!, color = MaterialTheme.colorScheme.error)
-                }
-            }
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = staffGreen,
+                errorBorderColor = Color.Red
+            ),
+            singleLine = true
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = passwordVisible,
-                onCheckedChange = { passwordVisible = it }
-            )
-            Text(text = "Show Password", style = MaterialTheme.typography.bodyMedium)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = {
-                staffIdError = null
-                passwordError = null
+                if (staffId.isBlank()) isStaffIdError = true
+                if (password.isBlank()) isPasswordError = true
 
-                if (staffId.isBlank()) {
-                    staffIdError = "Staff ID is required"
+                if (staffId.isBlank() || password.isBlank()) {
+                    Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show()
+                    return@Button
                 }
-                if (password.isBlank()) {
-                    passwordError = "Password is required"
-                }
-
-                if (staffIdError != null || passwordError != null) return@Button
 
                 coroutineScope.launch {
                     isLoading = true
                     try {
-                        val staffRecord = supabase.from("Staffprofile")
+                        // Table name "Staffprofile" as shown in screenshot
+                        val result = supabase.from("Staffprofile")
                             .select {
                                 filter {
                                     eq("Staffid", staffId)
+                                    eq("password", password)
                                 }
                             }.decodeSingleOrNull<StaffProfile>()
 
-                        if (staffRecord == null) {
-                            staffIdError = "Wrong Staff ID"
-                        } else if (staffRecord.password != password) {
-                            passwordError = "Wrong Password"
+                        if (result != null) {
+                            Toast.makeText(context, "Welcome, ${result.staffId}", Toast.LENGTH_SHORT).show()
+                            onLoginSuccess(result)
                         } else {
-                            Toast.makeText(context, "Welcome, ${staffRecord.staffName ?: staffRecord.staffId}", Toast.LENGTH_SHORT).show()
-                            onLoginSuccess(staffRecord)
+                            isStaffIdError = true
+                            isPasswordError = true
+                            Toast.makeText(context, "Invalid Staff ID or Password", Toast.LENGTH_SHORT).show()
                         }
                     } catch (e: Exception) {
                         Log.e("Login", "Error", e)
+                        isStaffIdError = true
+                        isPasswordError = true
                         Toast.makeText(context, "Login Error: ${e.message}", Toast.LENGTH_SHORT).show()
                     } finally {
                         isLoading = false

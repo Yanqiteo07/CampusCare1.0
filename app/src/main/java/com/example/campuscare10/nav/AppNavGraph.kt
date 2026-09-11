@@ -19,36 +19,51 @@ import io.github.jan.supabase.postgrest.from
 fun StaffReportApp() {
     val navController = rememberNavController()
     val reports = remember { mutableStateListOf<StaffReport>() }
-    var currentStaff by remember { mutableStateOf<StaffProfile?>(null) }
 
-    AppNavGraph(
-        navController = navController,
-        reports = reports,
-        currentStaff = currentStaff,
-        onStaffLogin = { currentStaff = it }
-    )
+    AppNavGraph(navController = navController, reports = reports)
 }
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    reports: SnapshotStateList<StaffReport>,
-    currentStaff: StaffProfile?,
-    onStaffLogin: (StaffProfile) -> Unit
+    reports: SnapshotStateList<StaffReport>
 ) {
+    var currentStaff by remember { mutableStateOf<StaffProfile?>(null) }
+
     NavHost(navController = navController, startDestination = "splash") {
         composable("splash") {
             SplashScreen(
-                onNavigateToStudent = { /* TODO: Student flow */ },
+                onNavigateToStudent = { navController.navigate("student_login") },
                 onNavigateToStaff = { navController.navigate("staff_login") }
+            )
+        }
+
+        composable("student_login") {
+            StudentLoginScreen(
+                onLoginSuccess = {
+                    navController.navigate("student_dashboard") {
+                        popUpTo("student_login") { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = { navController.navigate("register") },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("register") {
+            RegisterScreen(
+                onRegistrationSuccess = {
+                    navController.popBackStack()
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
         
         composable("staff_login") {
             StaffLoginScreen(
                 onLoginSuccess = { staff ->
-                    onStaffLogin(staff)
-                    navController.navigate("dashboard") {
+                    currentStaff = staff
+                    navController.navigate("staff_dashboard") {
                         popUpTo("splash") { inclusive = true }
                     }
                 },
@@ -56,7 +71,7 @@ fun AppNavGraph(
             )
         }
 
-        composable("dashboard") {
+        composable("staff_dashboard") {
             val context = LocalContext.current
             LaunchedEffect(Unit) {
                 try {
@@ -71,6 +86,16 @@ fun AppNavGraph(
             }
             DashboardScreen(reports, navController, currentStaff)
         }
+
+        composable("student_dashboard") {
+            StudentDashboardScreen(reports, navController)
+        }
+
+        composable("staff_profile") {
+            currentStaff?.let { staff ->
+                StaffProfileScreen(navController, staff)
+            }
+        }
         
         composable("reports") {
             StaffReportsScreen(reports, navController)
@@ -82,17 +107,6 @@ fun AppNavGraph(
         
         composable("add_equipment") {
             AddEquipmentScreen(navController)
-        }
-
-        composable("staff_profile") {
-            if (currentStaff != null) {
-                StaffProfileScreen(navController, currentStaff)
-            } else {
-                // Fallback to login if staff data is missing
-                navController.navigate("staff_login") {
-                    popUpTo(0) { inclusive = true }
-                }
-            }
         }
         
         composable("equipment_detail/{equipmentId}") { entry ->

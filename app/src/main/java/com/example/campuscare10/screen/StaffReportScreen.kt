@@ -126,7 +126,7 @@ fun StaffReportsScreen(reports: List<StaffReport>, navController: NavController)
     Scaffold(
         bottomBar = {
             NavigationBar {
-                NavigationBarItem(false, { navController.navigate("dashboard") }, { Text("⌂") }, label = { Text("Home") })
+                NavigationBarItem(false, { navController.navigate("staff_dashboard") }, { Text("⌂") }, label = { Text("Home") })
                 NavigationBarItem(true, {}, { Text("▤") }, label = { Text("Reports") })
                 NavigationBarItem(false, { navController.navigate("equipment_list") }, { Text("☰") }, label = { Text("Equipment") })
                 NavigationBarItem(false, { navController.navigate("staff_profile") }, { Text("◉") }, label = { Text("Profile") })

@@ -40,7 +40,7 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
             NavigationBar {
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("dashboard") { popUpTo("staff_profile") { inclusive = true } } },
+                    onClick = { navController.navigate("staff_dashboard") { popUpTo("staff_profile") { inclusive = true } } },
                     icon = { Text("⌂") },
                     label = { Text("Home") }
                 )
@@ -76,7 +76,7 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { navController.navigate("dashboard") { popUpTo("dashboard") { inclusive = true } } }) {
+                IconButton(onClick = { navController.navigate("staff_dashboard") { popUpTo("staff_dashboard") { inclusive = true } } }) {
                     Text("‹", style = MaterialTheme.typography.headlineMedium, color = Color.Gray)
                 }
                 Text("Profile", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
