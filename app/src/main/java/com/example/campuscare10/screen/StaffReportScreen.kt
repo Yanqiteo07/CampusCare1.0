@@ -18,12 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.campuscare10.datamodel.StaffProfile
 import com.example.campuscare10.datamodel.StaffReport
 import com.example.campuscare10.datamodel.statusColor
 import coil.compose.AsyncImage
 
 @Composable
-fun DashboardScreen(reports: List<StaffReport>, navController: NavController) {
+fun DashboardScreen(reports: List<StaffReport>, navController: NavController, staff: StaffProfile?) {
     val inProgress = reports.count { it.status == "In Progress" }
     val completed = reports.count { it.status == "Completed" }
 
@@ -63,7 +64,7 @@ fun DashboardScreen(reports: List<StaffReport>, navController: NavController) {
                 .padding(20.dp)
                 .padding(padding)
         ) {
-            Text("Hi, Staff!", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text("Hi, ${staff?.staffName ?: "Staff"}!", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Text("Here's the overview today.", style = MaterialTheme.typography.bodySmall)
 
             Spacer(Modifier.height(20.dp))

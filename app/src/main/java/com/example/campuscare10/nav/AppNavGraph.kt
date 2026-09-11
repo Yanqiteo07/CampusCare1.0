@@ -69,7 +69,7 @@ fun AppNavGraph(
                     Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
-            DashboardScreen(reports, navController)
+            DashboardScreen(reports, navController, currentStaff)
         }
         
         composable("reports") {
