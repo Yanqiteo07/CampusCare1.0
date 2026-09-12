@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.campuscare10.datamodel.StudentProfile
@@ -37,7 +36,6 @@ fun RegisterScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var username by remember { mutableStateOf("") }
-    var studentId by remember { mutableStateOf("") }
     var department by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var contactNumber by remember { mutableStateOf("") }
@@ -50,7 +48,6 @@ fun RegisterScreen(
 
     // Error states for red frames
     var usernameError by remember { mutableStateOf(false) }
-    var studentIdError by remember { mutableStateOf(false) }
     var departmentError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
     var contactNumberError by remember { mutableStateOf(false) }
@@ -78,12 +75,11 @@ fun RegisterScreen(
                 )
             }
 
-
+            // Scrollable Content Area
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .weight(1f, fill = false),
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -158,7 +154,6 @@ fun RegisterScreen(
                 }
 
                 RegisterTextField("Name", username, { username = it; usernameError = false }, Icons.Default.Person, isError = usernameError)
-                RegisterTextField("Student ID", studentId, { studentId = it.uppercase(); studentIdError = false }, Icons.Default.CreditCard, isError = studentIdError)
 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -222,111 +217,98 @@ fun RegisterScreen(
                 RegisterTextField("Confirm Password", confirmPassword, { confirmPassword = it; confirmPasswordError = false }, Icons.Default.Lock, isError = confirmPasswordError, keyboardType = KeyboardType.Password, isPassword = true)
 
                 Spacer(modifier = Modifier.height(16.dp))
+            }
 
-                // Save Button
-                Button(
-                    onClick = {
-                        // Check conditions and flag individual fields with red borders
-                        usernameError = username.isBlank()
-                        studentIdError = studentId.isBlank()
-                        departmentError = department.isBlank()
-                        emailError = email.isBlank()
-                        contactNumberError = contactNumber.isBlank() || contactNumber.length < 10
-                        passwordError = password.isBlank()
-                        confirmPasswordError = confirmPassword.isBlank()
+            // Fixed Bottom Register Button Container
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    // Check conditions and flag individual fields with red borders
+                    usernameError = username.isBlank()
+                    departmentError = department.isBlank()
+                    emailError = email.isBlank()
+                    contactNumberError = contactNumber.isBlank() || contactNumber.length < 10
+                    passwordError = password.isBlank()
+                    confirmPasswordError = confirmPassword.isBlank()
 
-                        if (usernameError || studentIdError || departmentError || emailError || contactNumberError || passwordError || confirmPasswordError) {
-                            errorMessage = "Please fill in all fields correctly!"
-                            return@Button
-                        }
+                    if (usernameError || departmentError || emailError || contactNumberError || passwordError || confirmPasswordError) {
+                        errorMessage = "Please fill in all fields correctly!"
+                        return@Button
+                    }
 
-                        // Validate Student ID format
-                        val studentIdRegex = "^\\d{2}[A-Z]{3}\\d{5}$".toRegex()
-                        if (!studentId.matches(studentIdRegex)) {
-                            errorMessage = "Invalid Student ID"
-                            studentIdError = true
-                            return@Button
-                        }
+                    // General email validation regex pattern
+                    val generalEmailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
+                    if (!email.matches(generalEmailRegex)) {
+                        errorMessage = "Invalid email format"
+                        emailError = true
+                        return@Button
+                    }
 
-                        // Fixed email validation regex pattern
-                        val studentEmailRegex = "^[A-Za-z0-9._%+-]+@student\\.tarc\\.edu\\.my$".toRegex()
-                        if (!email.matches(studentEmailRegex)) {
-                            errorMessage = "Invalid email format"
-                            emailError = true
-                            return@Button
-                        }
+                    // Check password match
+                    if (password != confirmPassword) {
+                        errorMessage = "Passwords do not match!"
+                        passwordError = true
+                        confirmPasswordError = true
+                        return@Button
+                    }
 
-                        // Check password match
-                        if (password != confirmPassword) {
-                            errorMessage = "Passwords do not match!"
-                            passwordError = true
-                            confirmPasswordError = true
-                            return@Button
-                        }
+                    isLoading = true
+                    errorMessage = null
 
-                        isLoading = true
-                        errorMessage = null
+                    coroutineScope.launch {
+                        try {
+                            supabase.auth.signUpWith(Email) {
+                                this.email = email
+                                this.password = password
+                            }
 
-                        coroutineScope.launch {
-                            try {
+                            val phoneNumDouble = contactNumber.toDoubleOrNull() ?: 0.0
 
-                                supabase.auth.signUpWith(Email) {
-                                    this.email = email
-                                    this.password = password
+                            val newProfile = StudentProfile(
+                                studentName = username,
+                                email = email,
+                                department = department,
+                                password = password,
+                                rating = 5.0,
+                                phoneNumber = phoneNumDouble
+                            )
+
+                            supabase.from("Studentprofiles").insert(newProfile)
+
+                            isLoading = false
+                            onRegistrationSuccess()
+                        } catch (e: Exception) {
+                            isLoading = false
+                            Log.e("Registration", "Error: ${e.message}", e)
+                            errorMessage = when {
+                                e.message?.contains("rate limit", ignoreCase = true) == true ->
+                                    "Too many attempts! Please wait a few minutes."
+                                e.message?.contains("unique constraint") == true -> {
+                                    emailError = true
+                                    "Email already registered!"
                                 }
-
-                                val newProfile = StudentProfile(
-                                    studentId = studentId,
-                                    username = username,
-                                    email = email,
-                                    role = "student",
-                                    department = department,
-                                    contactNo = contactNumber,
-                                    password = password,
-                                    rating = 5.0
-                                )
-
-
-                                supabase.from("Studentprofiles").insert(newProfile)
-
-                                isLoading = false
-                                onRegistrationSuccess()
-                            } catch (e: Exception) {
-                                isLoading = false
-                                Log.e("Registration", "Error: ${e.message}", e)
-                                errorMessage = when {
-                                    e.message?.contains("rate limit", ignoreCase = true) == true ->
-                                        "Too many attempts! Please wait a few minutes."
-                                    e.message?.contains("unique constraint") == true -> {
-                                        emailError = true
-                                        studentIdError = true
-                                        "Email or Student ID already registered!"
-                                    }
-                                    else -> "Registration failed: ${e.localizedMessage ?: "Please try again."}"
-                                }
+                                else -> "Registration failed: ${e.localizedMessage ?: "Please try again."}"
                             }
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = primaryPurple),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = !isLoading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text(
-                            text = "Register",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
                     }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = primaryPurple),
+                shape = RoundedCornerShape(12.dp),
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(
+                        text = "Register",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

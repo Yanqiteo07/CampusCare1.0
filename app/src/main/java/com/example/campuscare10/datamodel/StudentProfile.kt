@@ -5,12 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class StudentProfile(
-    @SerialName(value = "Studentid") val studentId: String? = null,
-    @SerialName(value = "StudentName") val username: String? = null,
-    @SerialName(value = "email") val email: String? = null,
-    @SerialName(value = "role") val role: String? = null,
-    @SerialName(value = "Department") val department: String? = null,
-    @SerialName(value = "PhoneNumber") val contactNo: String? = null, // Changed from "contact_no" to "PhoneNumber" to match Supabase
-    @SerialName(value = "password") val password: String? = null,
-    @SerialName(value = "rating") val rating: Double? = null
+    @SerialName("Studentid") val studentId: String? = null,
+    @SerialName("StudentName") val studentName: String,
+    @SerialName("email") val email: String,
+    @SerialName("Department") val department: String,
+    @SerialName("password") val password: String,
+    @SerialName("rating") val rating: Double,
+    @SerialName("PhoneNumber") val phoneNumber: Double
 )
