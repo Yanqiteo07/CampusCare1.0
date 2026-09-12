@@ -91,7 +91,8 @@ fun DashboardScreen(reports: List<StaffReport>, navController: NavController, st
             Spacer(Modifier.weight(1f))
             Button(
                 onClick = { navController.navigate("add_equipment") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
             ) {
                 Text("+ Add New Equipment")
             }

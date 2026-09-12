@@ -4,8 +4,10 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -37,39 +39,55 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate("staff_dashboard") { popUpTo("staff_profile") { inclusive = true } } },
-                    icon = { Text("⌂") },
-                    label = { Text("Home") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate("reports") { popUpTo("staff_profile") { inclusive = true } } },
-                    icon = { Text("▤") },
-                    label = { Text("Reports") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate("equipment_list") { popUpTo("staff_profile") { inclusive = true } } },
-                    icon = { Text("☰") },
-                    label = { Text("Equipment") }
-                )
-                NavigationBarItem(
-                    selected = true,
-                    onClick = {},
-                    icon = { Text("◉") },
-                    label = { Text("Profile") }
-                )
+            if (!isEditingPhone) {
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("staff_dashboard") {
+                                popUpTo("staff_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("⌂") },
+                        label = { Text("Home") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("reports") {
+                                popUpTo("staff_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("▤") },
+                        label = { Text("Reports") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("equipment_list") {
+                                popUpTo("staff_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("☰") },
+                        label = { Text("Equipment") }
+                    )
+                    NavigationBarItem(
+                        selected = true,
+                        onClick = {},
+                        icon = { Text("◉") },
+                        label = { Text("Profile") }
+                    )
+                }
             }
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp)
-                .padding(padding),
+                .padding(padding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -165,15 +183,17 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(
-                onClick = {
-                    navController.navigate("splash") { popUpTo(0) { inclusive = true } }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Logout", color = Color.White, fontWeight = FontWeight.Bold)
+            if (!isEditingPhone) {
+                Button(
+                    onClick = {
+                        navController.navigate("splash") { popUpTo(0) { inclusive = true } }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Logout", color = Color.White, fontWeight = FontWeight.Bold)
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
