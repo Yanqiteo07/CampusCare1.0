@@ -29,13 +29,12 @@ fun StudentLoginScreen(
     val primaryPurple = Color(0xFF6C47FF)
     val backgroundTint = Color(0xFFF8F8FC)
 
-    var studentId by remember { mutableStateOf("") }
+    var studentIdOrEmail by remember { mutableStateOf("") } // Renamed for clarity, handles both ID or Email
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var isStudentIdError by remember { mutableStateOf<String?>(null) }
     var isPasswordError by remember { mutableStateOf<String?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
-
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -78,17 +77,17 @@ fun StudentLoginScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 OutlinedTextField(
-                    value = studentId,
+                    value = studentIdOrEmail,
                     onValueChange = {
-                        studentId = it
+                        studentIdOrEmail = it
                         isStudentIdError = null
-                    },label = {
+                    },
+                    label = {
                         Text(
-                            text = isStudentIdError ?: "Student ID/ Email",
+                            text = isStudentIdError ?: "Student ID / Email",
                             color = if (isStudentIdError != null) MaterialTheme.colorScheme.error else Color.Unspecified
                         )
                     },
-
                     modifier = Modifier.fillMaxWidth(),
                     isError = isStudentIdError != null,
                     shape = RoundedCornerShape(12.dp),
@@ -97,9 +96,7 @@ fun StudentLoginScreen(
                         errorBorderColor = Color.Red,
                         errorLabelColor = Color.Red
                     ),
-
                     singleLine = true
-
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -109,7 +106,8 @@ fun StudentLoginScreen(
                     onValueChange = {
                         password = it
                         isPasswordError = null
-                    }, label = {
+                    },
+                    label = {
                         Text(
                             text = isPasswordError ?: "Password",
                             color = if (isPasswordError != null) MaterialTheme.colorScheme.error else Color.Unspecified
@@ -146,8 +144,8 @@ fun StudentLoginScreen(
                         isStudentIdError = null
                         isPasswordError = null
 
-                        if (studentId.isBlank()) {
-                            isStudentIdError = "Student ID required"
+                        if (studentIdOrEmail.isBlank()) {
+                            isStudentIdError = "Student ID or Email required"
                         }
                         if (password.isBlank()) {
                             isPasswordError = "Password required"
@@ -158,19 +156,27 @@ fun StudentLoginScreen(
                         coroutineScope.launch {
                             isLoading = true
                             try {
+                                // Query Supabase checking if input matches either Studentid OR Email
                                 val studentRecord = supabase.from("Studentprofiles")
                                     .select {
                                         filter {
-                                            eq("Studentid", studentId)
+                                            or {
+                                                eq("Studentid", studentIdOrEmail)
+                                                eq("Email", studentIdOrEmail)
+                                            }
                                         }
-                                    }.decodeSingleOrNull< StudentProfiles>()
+                                    }.decodeSingleOrNull<StudentProfiles>()
 
                                 if (studentRecord == null) {
-                                    isStudentIdError = "Wrong Student ID"
+                                    isStudentIdError = "Wrong Student ID or Email"
                                 } else if (studentRecord.password != password) {
                                     isPasswordError = "Wrong Password"
                                 } else {
-                                    Toast.makeText(context, "Welcome, ${studentRecord.studentName ?: studentRecord.studentId}", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Welcome, ${studentRecord.studentName ?: studentRecord.studentId}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                     onLoginSuccess()
                                 }
                             } catch (e: Exception) {
@@ -194,7 +200,6 @@ fun StudentLoginScreen(
                         Text("Login", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
-
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
