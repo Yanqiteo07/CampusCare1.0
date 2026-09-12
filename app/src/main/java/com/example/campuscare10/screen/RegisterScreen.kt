@@ -18,7 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.campuscare10.datamodel.StudentProfile
+import com.example.campuscare10.datamodel.StudentProfiles
 import com.example.campuscare10.supabase.supabase
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
@@ -262,15 +262,15 @@ fun RegisterScreen(
                                 this.password = password
                             }
 
-                            val phoneNumDouble = contactNumber.toDoubleOrNull() ?: 0.0
+                            val phoneNum = contactNumber.isNotBlank()
 
-                            val newProfile = StudentProfile(
+                            val newProfile = StudentProfiles(
                                 studentName = username,
                                 email = email,
                                 department = department,
                                 password = password,
                                 rating = 5.0,
-                                phoneNumber = phoneNumDouble
+                                phoneNumber = phoneNum.toString()
                             )
 
                             supabase.from("Studentprofiles").insert(newProfile)

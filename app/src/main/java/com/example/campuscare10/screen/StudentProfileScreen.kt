@@ -19,13 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.campuscare10.datamodel.StudentProfile
+import com.example.campuscare10.datamodel.StudentProfiles
 import com.example.campuscare10.supabase.supabase
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
 
 @Composable
-fun StudentProfileScreen(navController: NavController, student: StudentProfile) {
+fun StudentProfileScreen(navController: NavController, student: StudentProfiles) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val primaryColor = Color(0xFF303F9F) // Student Blue Theme
