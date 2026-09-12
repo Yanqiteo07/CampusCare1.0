@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.campuscare10.datamodel.StudentProfiles
@@ -41,6 +42,11 @@ fun RegisterScreen(
     var contactNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    // Visibility states for passwords
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
@@ -113,7 +119,9 @@ fun RegisterScreen(
                     icon: androidx.compose.ui.graphics.vector.ImageVector,
                     isError: Boolean = false,
                     keyboardType: KeyboardType = KeyboardType.Text,
-                    isPassword: Boolean = false
+                    isPassword: Boolean = false,
+                    passwordVisibleState: Boolean = false,
+                    onPasswordVisibilityToggle: () -> Unit = {}
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
@@ -132,8 +140,20 @@ fun RegisterScreen(
                             leadingIcon = {
                                 Icon(imageVector = icon, contentDescription = null, tint = if (isError) Color.Red else Color.Gray, modifier = Modifier.size(20.dp))
                             },
+                            trailingIcon = {
+                                if (isPassword) {
+                                    IconButton(onClick = onPasswordVisibilityToggle) {
+                                        Icon(
+                                            imageVector = if (passwordVisibleState) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                            contentDescription = "Toggle password visibility",
+                                            tint = Color.Gray,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            },
                             isError = isError,
-                            visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+                            visualTransformation = if (isPassword && !passwordVisibleState) PasswordVisualTransformation() else VisualTransformation.None,
                             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                             shape = RoundedCornerShape(10.dp),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -213,8 +233,30 @@ fun RegisterScreen(
 
                 RegisterTextField("Email Address", email, { email = it; emailError = false }, Icons.Default.Email, isError = emailError, keyboardType = KeyboardType.Email)
                 RegisterTextField("Contact Number", contactNumber, { if (it.length <= 11) { contactNumber = it; contactNumberError = false } }, Icons.Default.Phone, isError = contactNumberError, keyboardType = KeyboardType.Phone)
-                RegisterTextField("Password", password, { password = it; passwordError = false }, Icons.Default.Lock, isError = passwordError, keyboardType = KeyboardType.Password, isPassword = true)
-                RegisterTextField("Confirm Password", confirmPassword, { confirmPassword = it; confirmPasswordError = false }, Icons.Default.Lock, isError = confirmPasswordError, keyboardType = KeyboardType.Password, isPassword = true)
+
+                RegisterTextField(
+                    label = "Password",
+                    value = password,
+                    onValueChange = { password = it; passwordError = false },
+                    icon = Icons.Default.Lock,
+                    isError = passwordError,
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true,
+                    passwordVisibleState = passwordVisible,
+                    onPasswordVisibilityToggle = { passwordVisible = !passwordVisible }
+                )
+
+                RegisterTextField(
+                    label = "Confirm Password",
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it; confirmPasswordError = false },
+                    icon = Icons.Default.Lock,
+                    isError = confirmPasswordError,
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true,
+                    passwordVisibleState = confirmPasswordVisible,
+                    onPasswordVisibilityToggle = { confirmPasswordVisible = !confirmPasswordVisible }
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -236,10 +278,10 @@ fun RegisterScreen(
                         return@Button
                     }
 
-                    // General email validation regex pattern
-                    val generalEmailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
-                    if (!email.matches(generalEmailRegex)) {
-                        errorMessage = "Invalid email format"
+                    // Email format validation matching @student.xxxx.edu.my pattern
+                    val studentEmailRegex = "^[A-Za-z0-9._%+-]+@student\\.[A-Za-z0-9-]+\\.edu\\.my$".toRegex()
+                    if (!email.matches(studentEmailRegex)) {
+                        errorMessage = "Email must follow format: username@student.xxxx.edu.my"
                         emailError = true
                         return@Button
                     }
@@ -262,15 +304,13 @@ fun RegisterScreen(
                                 this.password = password
                             }
 
-                            val phoneNum = contactNumber.isNotBlank()
-
                             val newProfile = StudentProfiles(
                                 studentName = username,
                                 email = email,
                                 department = department,
                                 password = password,
                                 rating = 5.0,
-                                phoneNumber = phoneNum.toString()
+                                phoneNumber = contactNumber
                             )
 
                             supabase.from("Studentprofiles").insert(newProfile)
