@@ -4,8 +4,10 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -31,25 +33,60 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles)
     val primaryColor = Color(0xFF303F9F) // Student Blue Theme
     val lightContainerColor = Color(0xFFE2E4FF)
 
-    // Fixed: changed contactNo to phoneNumber and handled type correctly
-    var phoneNumber by remember { mutableStateOf(student.phoneNumber.toString()) }
+    var studentDetails by remember { mutableStateOf(student) }
+    var phoneNumber by remember { mutableStateOf(student.phoneNumber ?: "") }
     var isEditingPhone by remember { mutableStateOf(false) }
     var isUpdating by remember { mutableStateOf(false) }
+
+    // Fetch the latest profile data from Supabase to keep it in sync
+    LaunchedEffect(Unit) {
+        try {
+            val latestProfile = supabase.from("Studentprofiles")
+                .select {
+                    filter { eq("Studentid", student.studentId ?: "") }
+                }.decodeSingleOrNull<StudentProfiles>()
+
+            if (latestProfile != null) {
+                studentDetails = latestProfile
+                phoneNumber = latestProfile.phoneNumber ?: ""
+            }
+        } catch (e: Exception) {
+            // Handle error silently or log
+        }
+    }
 
     Scaffold(
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("student_dashboard") { popUpTo("student_profile") { inclusive = true } } },
+                    onClick = {
+                        navController.navigate("student_dashboard") {
+                            popUpTo("student_profile") { inclusive = true }
+                        }
+                    },
                     icon = { Text("⌂") },
                     label = { Text("Home") }
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("reports") { popUpTo("student_profile") { inclusive = true } } },
+                    onClick = {
+                        navController.navigate("reports") {
+                            popUpTo("student_profile") { inclusive = true }
+                        }
+                    },
                     icon = { Text("▤") },
-                    label = { Text("My Reports") }
+                    label = { Text("Reports") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = {
+                        navController.navigate("student_notifications") {
+                            popUpTo("student_profile") { inclusive = true }
+                        }
+                    },
+                    icon = { Text("☰") },
+                    label = { Text("Alerts") }
                 )
                 NavigationBarItem(
                     selected = true,
@@ -63,28 +100,19 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles)
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp)
-                .padding(padding),
+                .padding(padding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { navController.navigate("student_dashboard") { popUpTo("student_dashboard") { inclusive = true } } }) {
-                    Text("‹", style = MaterialTheme.typography.headlineMedium, color = Color.Gray)
-                }
-                Text("Profile", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
-            }
-
             Spacer(modifier = Modifier.height(20.dp))
 
             Box(
                 modifier = Modifier.size(80.dp).clip(CircleShape).background(lightContainerColor),
                 contentAlignment = Alignment.Center
             ) {
-                // Fixed: changed username to studentName
-                val displayName = student.studentName.ifEmpty { student.studentId ?: "U" }
+                val displayName = studentDetails.studentName.ifEmpty { studentDetails.studentId ?: "U" }
                 val initials = displayName.filter { it.isUpperCase() }.let {
                     if (it.isEmpty()) displayName.take(1).uppercase() else it.take(2)
                 }
@@ -93,18 +121,17 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles)
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Fixed: changed username to studentName
-            Text(text = student.studentName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text(text = student.email, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(text = studentDetails.studentName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(text = studentDetails.email, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
 
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 repeat(5) { Text(text = "★", color = Color(0xFFFFC107), fontSize = 14.sp) }
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = student.rating.toString(), fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                Text(text = studentDetails.rating.toString(), fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(25.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -113,9 +140,9 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles)
                 border = BorderStroke(1.dp, Color(0xFFE5E5E5))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Student ID : ${student.studentId ?: "N/A"}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(text = "Student ID : ${studentDetails.studentId ?: "N/A"}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(text = "Department: ${student.department}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(text = "Department: ${studentDetails.department}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
@@ -128,6 +155,7 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles)
                                 value = phoneNumber,
                                 onValueChange = { phoneNumber = it },
                                 label = { Text("Phone Number") },
+                                singleLine = true,
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -136,12 +164,13 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles)
                                     coroutineScope.launch {
                                         isUpdating = true
                                         try {
-                                            val phoneVal = phoneNumber.toDoubleOrNull() ?: 0.0
                                             supabase.from("Studentprofiles").update({
-                                                set("PhoneNumber", phoneVal)
+                                                set("PhoneNumber", phoneNumber)
                                             }) {
-                                                filter { eq("Studentid", student.studentId ?: "") }
+                                                filter { eq("Studentid", studentDetails.studentId ?: "") }
                                             }
+                                            // Update local state object so it reflects immediately
+                                            studentDetails = studentDetails.copy(phoneNumber = phoneNumber)
                                             isEditingPhone = false
                                             Toast.makeText(context, "Phone updated successfully", Toast.LENGTH_SHORT).show()
                                         } catch (e: Exception) {
@@ -172,7 +201,7 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles)
 
             Button(
                 onClick = {
-                    navController.navigate("student_login") { popUpTo(0) { inclusive = true } }
+                    navController.navigate("splash") { popUpTo(0) { inclusive = true } }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = primaryColor),

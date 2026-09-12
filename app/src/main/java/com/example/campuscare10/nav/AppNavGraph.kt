@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.campuscare10.datamodel.StaffProfile
 import com.example.campuscare10.datamodel.StaffReport
+import com.example.campuscare10.datamodel.StudentProfiles
 import com.example.campuscare10.screen.*
 import com.example.campuscare10.supabase.supabase
 import io.github.jan.supabase.postgrest.from
@@ -29,6 +30,7 @@ fun AppNavGraph(
     reports: SnapshotStateList<StaffReport>
 ) {
     var currentStaff by remember { mutableStateOf<StaffProfile?>(null) }
+    var currentStudent by remember { mutableStateOf<StudentProfiles?>(null) }
 
     NavHost(navController = navController, startDestination = "splash") {
         composable("splash") {
@@ -40,7 +42,8 @@ fun AppNavGraph(
 
         composable("student_login") {
             StudentLoginScreen(
-                onLoginSuccess = {
+                onLoginSuccess = { student ->
+                    currentStudent = student
                     navController.navigate("student_dashboard") {
                         popUpTo("student_login") { inclusive = true }
                     }
@@ -58,7 +61,7 @@ fun AppNavGraph(
                 onBackClick = { navController.popBackStack() }
             )
         }
-        
+
         composable("staff_login") {
             StaffLoginScreen(
                 onLoginSuccess = { staff ->
@@ -88,7 +91,24 @@ fun AppNavGraph(
         }
 
         composable("student_dashboard") {
-            StudentDashboardScreen(reports, navController)
+            StudentDashboardScreen(reports, navController, currentStudent?.studentName ?: "Student")
+        }
+
+        // Added route for Submitting a Report (referenced from student dashboard)
+        composable("submit_report") {
+            SubmitReportScreen(navController, currentStudent?.studentId ?: "Unknown")
+        }
+
+        // Connected Student Profile screen
+        composable("student_profile") {
+            currentStudent?.let { student ->
+                StudentProfileScreen(navController, student)
+            }
+        }
+
+        // Connected Student Notifications / Alerts screen
+        composable("student_notifications") {
+            StudentNotificationsScreen(navController)
         }
 
         composable("staff_profile") {
@@ -96,33 +116,33 @@ fun AppNavGraph(
                 StaffProfileScreen(navController, staff)
             }
         }
-        
+
         composable("reports") {
-            StaffReportsScreen(reports, navController)
+            MyReportsScreen(navController)
         }
-        
+
         composable("equipment_list") {
             EquipmentListScreen(navController)
         }
-        
+
         composable("add_equipment") {
             AddEquipmentScreen(navController)
         }
-        
+
         composable("equipment_detail/{equipmentId}") { entry ->
             val equipmentId = entry.arguments?.getString("equipmentId")?.toLongOrNull()
             if (equipmentId != null) {
                 EquipmentDetailScreen(navController, equipmentId)
             }
         }
-        
+
         composable("edit_equipment/{equipmentId}") { entry ->
             val equipmentId = entry.arguments?.getString("equipmentId")?.toLongOrNull()
             if (equipmentId != null) {
                 EditEquipmentScreen(navController, equipmentId)
             }
         }
-        
+
         composable("detail/{reportId}") { entry ->
             val reportId = entry.arguments?.getString("reportId")?.toIntOrNull()
             val report = reports.find { it.id == reportId }
@@ -130,7 +150,7 @@ fun AppNavGraph(
                 ReportDetailScreen(report, navController)
             }
         }
-        
+
         composable("update/{reportId}") { entry ->
             val reportId = entry.arguments?.getString("reportId")?.toIntOrNull()
             val reportIndex = reports.indexOfFirst { it.id == reportId }

@@ -48,7 +48,7 @@ import com.example.campuscare10.datamodel.StaffReport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubmitReportScreen(navController: NavController){
+fun SubmitReportScreen(navController: NavController, studentId: String = "Unknown Student"){
     val categoryOptions = listOf("Lecture Hall", "Classroom", "Toilet", "Building", "Others")
     var selectedCategory by remember { mutableStateOf("") }
     var locationText by remember { mutableStateOf("") }
@@ -155,7 +155,7 @@ fun SubmitReportScreen(navController: NavController){
                         category = selectedCategory,
                         location = locationText,
                         description = descText,
-                        submittedBy = CURRENT_USER,
+                        submittedBy = studentId,
                         status = "Submitted",
                         imageUri = finalImageUrl,
                         note = null

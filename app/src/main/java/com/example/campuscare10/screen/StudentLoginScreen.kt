@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun StudentLoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (StudentProfiles) -> Unit,
     onNavigateToRegister: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -177,7 +177,7 @@ fun StudentLoginScreen(
                                         "Welcome, ${studentRecord.studentName ?: studentRecord.studentId}",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    onLoginSuccess()
+                                    onLoginSuccess(studentRecord)
                                 }
                             } catch (e: Exception) {
                                 Log.e("Login", "Error", e)
