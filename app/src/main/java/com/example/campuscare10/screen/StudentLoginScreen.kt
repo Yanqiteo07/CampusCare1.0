@@ -15,7 +15,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.campuscare10.datamodel.StudentProfile
+import com.example.campuscare10.datamodel.StudentProfiles
 import com.example.campuscare10.supabase.supabase
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
@@ -31,11 +31,11 @@ fun StudentLoginScreen(
 
     var studentId by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    
-    var studentIdError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
+    var isStudentIdError by remember { mutableStateOf<String?>(null) }
+    var isPasswordError by remember { mutableStateOf<String?>(null) }
+    var passwordVisible by remember { mutableStateOf(false) }
+
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -79,44 +79,45 @@ fun StudentLoginScreen(
 
                 OutlinedTextField(
                     value = studentId,
-                    onValueChange = { 
+                    onValueChange = {
                         studentId = it
-                        studentIdError = null 
-                    },
-                    label = { 
+                        isStudentIdError = null
+                    },label = {
                         Text(
-                            text = studentIdError ?: "Student ID / Email",
-                            color = if (studentIdError != null) MaterialTheme.colorScheme.error else Color.Unspecified
-                        ) 
+                            text = isStudentIdError ?: "Student ID/ Email",
+                            color = if (isStudentIdError != null) MaterialTheme.colorScheme.error else Color.Unspecified
+                        )
                     },
+
                     modifier = Modifier.fillMaxWidth(),
-                    isError = studentIdError != null,
+                    isError = isStudentIdError != null,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryPurple,
                         errorBorderColor = Color.Red,
                         errorLabelColor = Color.Red
                     ),
+
                     singleLine = true
+
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { 
+                    onValueChange = {
                         password = it
-                        passwordError = null
-                    },
-                    label = { 
+                        isPasswordError = null
+                    }, label = {
                         Text(
-                            text = passwordError ?: "Password",
-                            color = if (passwordError != null) MaterialTheme.colorScheme.error else Color.Unspecified
-                        ) 
+                            text = isPasswordError ?: "Password",
+                            color = if (isPasswordError != null) MaterialTheme.colorScheme.error else Color.Unspecified
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    isError = passwordError != null,
+                    isError = isPasswordError != null,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryPurple,
@@ -125,6 +126,8 @@ fun StudentLoginScreen(
                     ),
                     singleLine = true
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -138,69 +141,60 @@ fun StudentLoginScreen(
                     Text(text = "Show Password", style = MaterialTheme.typography.bodyMedium)
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
                 Button(
                     onClick = {
-                        studentIdError = null
-                        passwordError = null
+                        isStudentIdError = null
+                        isPasswordError = null
 
                         if (studentId.isBlank()) {
-                            studentIdError = "Field required"
+                            isStudentIdError = "Student ID required"
                         }
                         if (password.isBlank()) {
-                            passwordError = "Password required"
+                            isPasswordError = "Password required"
                         }
 
-                        if (studentIdError != null || passwordError != null) return@Button
+                        if (isStudentIdError != null || isPasswordError != null) return@Button
 
                         coroutineScope.launch {
                             isLoading = true
                             try {
-                                val result = supabase.from("Studentprofiles")
+                                val studentRecord = supabase.from("Studentprofiles")
                                     .select {
                                         filter {
-                                            eq("email", studentId)
-                                            eq("password", password)
+                                            eq("Studentid", studentId)
                                         }
-                                    }.decodeSingleOrNull<StudentProfile>()
+                                    }.decodeSingleOrNull< StudentProfiles>()
 
-                                if (result != null) {
-                                    Toast.makeText(context, "Welcome, ${result.username ?: studentId}", Toast.LENGTH_SHORT).show()
-                                    onLoginSuccess()
+                                if (studentRecord == null) {
+                                    isStudentIdError = "Wrong Student ID"
+                                } else if (studentRecord.password != password) {
+                                    isPasswordError = "Wrong Password"
                                 } else {
-                                    studentIdError = "Invalid Login"
-                                    passwordError = "Invalid Login"
-                                    Toast.makeText(context, "Invalid ID or Password", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Welcome, ${studentRecord.studentName ?: studentRecord.studentId}", Toast.LENGTH_SHORT).show()
+                                    onLoginSuccess()
                                 }
                             } catch (e: Exception) {
-                                Log.e("StudentLogin", "Error", e)
+                                Log.e("Login", "Error", e)
                                 Toast.makeText(context, "Login Error: ${e.message}", Toast.LENGTH_SHORT).show()
                             } finally {
                                 isLoading = false
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = primaryPurple),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryPurple),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = !isLoading
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     } else {
-                        Text(
-                            text = "Login",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
+                        Text("Login", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
