@@ -269,7 +269,7 @@ fun RegisterScreen(
                     usernameError = username.isBlank()
                     departmentError = department.isBlank()
                     emailError = email.isBlank()
-                    contactNumberError = contactNumber.isBlank() || contactNumber.length < 10
+                    contactNumberError = contactNumber.isBlank() || contactNumber.length <= 11
                     passwordError = password.isBlank()
                     confirmPasswordError = confirmPassword.isBlank()
 
