@@ -92,7 +92,8 @@ fun ReportDetailScreen(
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = { navController.navigate("update/${report.id}") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
             ) {
                 Text("Update Status")
             }

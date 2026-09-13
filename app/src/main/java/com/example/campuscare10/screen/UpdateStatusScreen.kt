@@ -239,7 +239,8 @@ fun UpdateStatusScreen(
                 }
             },
             enabled = !isUploading,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
         ) {
             if (isUploading) {
                 Text("Uploading...")

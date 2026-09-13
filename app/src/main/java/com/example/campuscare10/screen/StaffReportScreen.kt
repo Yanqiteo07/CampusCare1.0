@@ -61,34 +61,58 @@ fun DashboardScreen(reports: List<StaffReport>, navController: NavController, st
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp)
                 .padding(padding)
+                .padding(20.dp)
         ) {
-            Text("Hi, ${staff?.staffName ?: "Staff"}!", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                "Hi, ${staff?.staffName ?: "Staff"}!",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
             Text("Here's the overview today.", style = MaterialTheme.typography.bodySmall)
 
             Spacer(Modifier.height(20.dp))
-            Text("Overview", fontWeight = FontWeight.Bold)
 
+            Text("Overview", fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OverviewCard("Total Reports", reports.size.toString(), Color(0xFFE2E4FF), Modifier.weight(1f))
-                OverviewCard("In Progress", inProgress.toString(), Color(0xFFFFE9D7), Modifier.weight(1f))
-                OverviewCard("Completed", completed.toString(), Color(0xFFDDEFD9), Modifier.weight(1f))
+                OverviewCard(
+                    "Total Reports",
+                    reports.size.toString(),
+                    Color(0xFFE2E4FF),
+                    Modifier.weight(1f)
+                )
+                OverviewCard(
+                    "In Progress",
+                    inProgress.toString(),
+                    Color(0xFFFFE9D7),
+                    Modifier.weight(1f)
+                )
+                OverviewCard(
+                    "Completed",
+                    completed.toString(),
+                    Color(0xFFDDEFD9),
+                    Modifier.weight(1f)
+                )
             }
 
             Spacer(Modifier.height(24.dp))
+
             Text("Recent Reports", fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
 
-            reports.take(3).forEach { report ->
-                ReportCard(report) {
-                    navController.navigate("detail/${report.id}")
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(reports) { report ->
+                    ReportCard(report) {
+                        navController.navigate("detail/${report.id}")
+                    }
                 }
-                Spacer(Modifier.height(8.dp))
             }
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(16.dp))
             Button(
                 onClick = { navController.navigate("add_equipment") },
                 modifier = Modifier.fillMaxWidth(),
