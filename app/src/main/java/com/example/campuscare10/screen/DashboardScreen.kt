@@ -76,7 +76,7 @@ fun StudentDashboardScreen(
                         }
                     },
                     icon = { Text("☰") },
-                    label = { Text("Alerts") }
+                    label = { Text("Equipment") }
                 )
                 // Navigation to the Student Profile screen tab
                 NavigationBarItem(

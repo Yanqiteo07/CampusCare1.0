@@ -79,7 +79,7 @@ fun MyReportsScreen(navController: NavController, studentId: String = "") {
                     selected = false,
                     onClick = { navController.navigate("student_notifications") { popUpTo("reports") { inclusive = true } } },
                     icon = { Text("☰") },
-                    label = { Text("Alerts") }
+                    label = { Text("Equipment") }
                 )
                 NavigationBarItem(
                     selected = false,
