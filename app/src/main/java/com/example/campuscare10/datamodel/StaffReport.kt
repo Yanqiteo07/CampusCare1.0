@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class StaffReport(
-    @SerialName("id") val id: Int = 0,
+    @SerialName("id") val id: String? = null,
     val category: String = "",
     val location: String = "",
     val description: String = "",

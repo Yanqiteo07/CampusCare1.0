@@ -161,8 +161,8 @@ fun AppNavGraph(
         }
 
         composable("detail/{reportId}") { entry ->
-            val reportId = entry.arguments?.getString("reportId")?.toLongOrNull()
-            var report by remember { mutableStateOf<StaffReport?>(reports.find { it.id == reportId?.toInt() }) }
+            val reportId = entry.arguments?.getString("reportId")
+            var report by remember { mutableStateOf<StaffReport?>(reports.find { it.id == reportId }) }
 
             if (report == null && reportId != null) {
                 LaunchedEffect(reportId) {
@@ -184,7 +184,7 @@ fun AppNavGraph(
         }
 
         composable("update/{reportId}") { entry ->
-            val reportId = entry.arguments?.getString("reportId")?.toIntOrNull()
+            val reportId = entry.arguments?.getString("reportId")
             val reportIndex = reports.indexOfFirst { it.id == reportId }
 
             if (reportIndex >= 0) {

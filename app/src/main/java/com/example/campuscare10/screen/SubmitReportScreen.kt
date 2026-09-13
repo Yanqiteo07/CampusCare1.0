@@ -153,7 +153,7 @@ fun SubmitReportScreen(navController: NavController, studentId: String = "Unknow
                         }
 
                         val newReport = StaffReport(
-                            id = 0,
+                            id = null,
                             category = selectedCategory,
                             location = locationText,
                             description = descText,

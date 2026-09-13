@@ -37,7 +37,8 @@ fun StudentDashboardScreen(
         // Fetch from database to get up-to-date and all records for this user
         val allReports = repo.fetchAllReports()
         // Filter by current student id and sort descending by id so latest reports appear first
-        reportList = allReports.filter { it.submittedBy == studentId }.sortedByDescending { it.id }
+        reportList = allReports.filter { it.submittedBy == studentId }
+            .sortedByDescending { it.id?.toIntOrNull() ?: 0 }
         isLoading = false
     }
 
@@ -136,7 +137,7 @@ fun StudentDashboardScreen(
                 ) {
                     items(
                         items = reportList,
-                        key = { it.id }
+                        key = { it.id ?: "" }
                     ) { report ->
                         ReportRow(report = report, onClick = {
                             navController.navigate("detail/${report.id}")

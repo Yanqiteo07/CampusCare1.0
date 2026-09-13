@@ -105,7 +105,8 @@ fun DashboardScreen(reports: List<StaffReport>, navController: NavController, st
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(reports) { report ->
+                val sortedReports = reports.sortedByDescending { it.id?.toIntOrNull() ?: 0 }
+                items(sortedReports) { report ->
                     ReportCard(report) {
                         navController.navigate("detail/${report.id}")
                     }
@@ -146,7 +147,7 @@ fun StaffReportsScreen(reports: List<StaffReport>, navController: NavController)
 
     val filteredReports = reports.filter {
         selectedStatus == "All Status" || it.status == selectedStatus
-    }
+    }.sortedByDescending { it.id?.toIntOrNull() ?: 0 }
 
     Scaffold(
         bottomBar = {

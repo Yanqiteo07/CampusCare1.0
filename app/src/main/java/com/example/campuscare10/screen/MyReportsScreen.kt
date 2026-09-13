@@ -48,7 +48,8 @@ fun MyReportsScreen(navController: NavController, studentId: String = "") {
     LaunchedEffect(Unit) {
         isLoading = true
         val cloudData = repo.fetchAllReports()
-        allUserReports = cloudData.filter { it.submittedBy == studentId }.sortedByDescending { it.id }
+        allUserReports = cloudData.filter { it.submittedBy == studentId }
+            .sortedByDescending { it.id?.toIntOrNull() ?: 0 }
         isLoading = false
     }
 
@@ -120,7 +121,7 @@ fun MyReportsScreen(navController: NavController, studentId: String = "") {
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(
                         items = filteredList,
-                        key = { it.id }
+                        key = { it.id ?: "" }
                     ) { report ->
                         ReportRow(report = report, onClick = {
                             navController.navigate("detail/${report.id}")

@@ -218,7 +218,7 @@ fun UpdateStatusScreen(
                         Log.d("Supabase", "Attempting to update report ${report.id} with data: $updateData")
                         supabase.from("reports").update(updateData) {
                             filter {
-                                eq("id", report.id)
+                                eq("id", report.id ?: "")
                             }
                         }
                         Log.d("Supabase", "Successfully updated report ${report.id} in Supabase")

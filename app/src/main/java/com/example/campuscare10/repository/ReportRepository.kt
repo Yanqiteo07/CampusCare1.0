@@ -26,7 +26,7 @@ class ReportRepository {
         }
     }
 
-    suspend fun getReportById(reportId: Long): StaffReport? {
+    suspend fun getReportById(reportId: String): StaffReport? {
         return try {
             val list = supabase
                 .from("reports")
