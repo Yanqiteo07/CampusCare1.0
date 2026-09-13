@@ -22,7 +22,8 @@ import com.example.campuscare10.datamodel.statusColor
 @Composable
 fun ReportDetailScreen(
     report: StaffReport,
-    navController: NavController
+    navController: NavController,
+    isStaff: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -87,12 +88,14 @@ fun ReportDetailScreen(
         }
         DetailItem("Rating", "${report.rating} / 5.0")
 
-        Spacer(Modifier.height(24.dp))
-        Button(
-            onClick = { navController.navigate("update/${report.id}") },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Update Status")
+        if (isStaff) {
+            Spacer(Modifier.height(24.dp))
+            Button(
+                onClick = { navController.navigate("update/${report.id}") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Update Status")
+            }
         }
     }
 }

@@ -2,8 +2,13 @@ package com.example.campuscare10.nav
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -12,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.campuscare10.datamodel.StaffProfile
 import com.example.campuscare10.datamodel.StaffReport
 import com.example.campuscare10.datamodel.StudentProfiles
+import com.example.campuscare10.repository.ReportRepository
 import com.example.campuscare10.screen.*
 import com.example.campuscare10.supabase.supabase
 import io.github.jan.supabase.postgrest.from
@@ -144,10 +150,25 @@ fun AppNavGraph(
         }
 
         composable("detail/{reportId}") { entry ->
-            val reportId = entry.arguments?.getString("reportId")?.toIntOrNull()
-            val report = reports.find { it.id == reportId }
+            val reportId = entry.arguments?.getString("reportId")?.toLongOrNull()
+            var report by remember { mutableStateOf<StaffReport?>(reports.find { it.id == reportId?.toInt() }) }
+
+            if (report == null && reportId != null) {
+                LaunchedEffect(reportId) {
+                    report = ReportRepository().getReportById(reportId)
+                }
+            }
+
             if (report != null) {
-                ReportDetailScreen(report, navController)
+                ReportDetailScreen(
+                    report = report!!,
+                    navController = navController,
+                    isStaff = currentStaff != null
+                )
+            } else {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
         }
 
