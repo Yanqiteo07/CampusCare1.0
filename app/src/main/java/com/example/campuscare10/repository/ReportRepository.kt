@@ -3,17 +3,16 @@ package com.example.campuscare10.repository
 import android.content.Context
 import android.net.Uri
 import com.example.campuscare10.datamodel.StaffReport
-// Ensure you point to your actual Supabase client initialization object
-// import com.example.campuscare10.data.SupabaseClient.client as supabase
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.util.UUID
+import java.util.Locale
 import com.example.campuscare10.supabase.supabase
-class ReportRepository {
 
+class ReportRepository {
 
     suspend fun fetchAllReports(): List<StaffReport> {
         return try {
@@ -45,11 +44,31 @@ class ReportRepository {
     }
 
     suspend fun insertNewReport(newReport: StaffReport) {
-
         supabase
             .from("reports")
             .insert(newReport)
+    }
 
+    suspend fun updateStudentRating(studentId: String) {
+        try {
+            val reports = fetchAllReports()
+            val studentReports = reports.filter { it.submittedBy == studentId && it.rating != null }
+            val averageRating = if (studentReports.isNotEmpty()) {
+                val total = studentReports.sumOf { it.rating?.toDouble() ?: 0.0 }
+                total / studentReports.size
+            } else {
+                0.0
+            }
+            val formattedRating = String.format(Locale.getDefault(), "%.1f", averageRating).toDouble()
+
+            supabase.from("Studentprofiles").update({
+                set("Rating", formattedRating)
+            }) {
+                filter { eq("Studentid", studentId) }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     suspend fun uploadImageToStorage(
@@ -69,7 +88,6 @@ class ReportRepository {
             val publicUrl = supabase.storage.from(bucketName).publicUrl(fileName)
             return@withContext publicUrl
 
-            null
         } catch (e: Exception) {
             e.printStackTrace()
             null
