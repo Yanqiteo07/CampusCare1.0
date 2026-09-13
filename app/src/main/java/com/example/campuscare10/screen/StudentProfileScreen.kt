@@ -27,7 +27,7 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
 
 @Composable
-fun StudentProfileScreen(navController: NavController, student: StudentProfiles) {
+fun StudentProfileScreen(navController: NavController, student: StudentProfiles, onLogout: () -> Unit) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val primaryColor = Color(0xFF303F9F) // Student Blue Theme
@@ -199,15 +199,18 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles)
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(
-                onClick = {
-                    navController.navigate("splash") { popUpTo(0) { inclusive = true } }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Logout", color = Color.White, fontWeight = FontWeight.Bold)
+            if (!isEditingPhone) {
+                Button(
+                    onClick = {
+                        onLogout()
+                        navController.navigate("splash") { popUpTo(0) { inclusive = true } }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Logout", color = Color.White, fontWeight = FontWeight.Bold)
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))

@@ -23,7 +23,7 @@ import com.example.campuscare10.datamodel.statusColor
 fun ReportDetailScreen(
     report: StaffReport,
     navController: NavController,
-    isStaff: Boolean = false
+    isStaff: Boolean
 ) {
     Column(
         modifier = Modifier

@@ -39,7 +39,7 @@ fun DashboardScreen(reports: List<StaffReport>, navController: NavController, st
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("reports") },
+                    onClick = { navController.navigate("staff_reports") },
                     icon = { Text("▤") },
                     label = { Text("Reports") }
                 )

@@ -67,7 +67,7 @@ fun EquipmentListScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("reports") },
+                    onClick = { navController.navigate("staff_reports") },
                     icon = { Text("▤") },
                     label = { Text("Reports") }
                 )

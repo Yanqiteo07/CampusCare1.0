@@ -27,7 +27,7 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
 
 @Composable
-fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
+fun StaffProfileScreen(navController: NavController, staff: StaffProfile, onLogout: () -> Unit) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val primaryColor = Color(0xFF2E7D32) // Staff Green Theme
@@ -69,7 +69,7 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
                 NavigationBarItem(
                     selected = false,
                     onClick = {
-                        navController.navigate("reports") {
+                        navController.navigate("staff_reports") {
                             popUpTo("staff_profile") { inclusive = true }
                         }
                     },
@@ -104,6 +104,20 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Header with Back Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { 
+                    navController.navigate("staff_dashboard") { 
+                        popUpTo("staff_dashboard") { inclusive = true } 
+                    } 
+                }) {
+                    Text("‹", style = MaterialTheme.typography.headlineMedium, color = Color.Gray)
+                }
+                Text("Profile", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -195,15 +209,18 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(
-                onClick = {
-                    navController.navigate("splash") { popUpTo(0) { inclusive = true } }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Logout", color = Color.White, fontWeight = FontWeight.Bold)
+            if (!isEditingPhone) {
+                Button(
+                    onClick = {
+                        onLogout()
+                        navController.navigate("splash") { popUpTo(0) { inclusive = true } }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Logout", color = Color.White, fontWeight = FontWeight.Bold)
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))

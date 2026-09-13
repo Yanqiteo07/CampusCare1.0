@@ -50,6 +50,7 @@ fun AppNavGraph(
             StudentLoginScreen(
                 onLoginSuccess = { student ->
                     currentStudent = student
+                    currentStaff = null
                     navController.navigate("student_dashboard") {
                         popUpTo("student_login") { inclusive = true }
                     }
@@ -72,6 +73,7 @@ fun AppNavGraph(
             StaffLoginScreen(
                 onLoginSuccess = { staff ->
                     currentStaff = staff
+                    currentStudent = null
                     navController.navigate("staff_dashboard") {
                         popUpTo("splash") { inclusive = true }
                     }
@@ -108,7 +110,7 @@ fun AppNavGraph(
         // Connected Student Profile screen
         composable("student_profile") {
             currentStudent?.let { student ->
-                StudentProfileScreen(navController, student)
+                StudentProfileScreen(navController, student, onLogout = { currentStudent = null })
             }
         }
 
@@ -119,8 +121,12 @@ fun AppNavGraph(
 
         composable("staff_profile") {
             currentStaff?.let { staff ->
-                StaffProfileScreen(navController, staff)
+                StaffProfileScreen(navController, staff, onLogout = { currentStaff = null })
             }
+        }
+
+        composable("staff_reports") {
+            StaffReportsScreen(reports, navController)
         }
 
         composable("reports") {
