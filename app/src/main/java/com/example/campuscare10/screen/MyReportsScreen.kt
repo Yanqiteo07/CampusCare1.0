@@ -48,7 +48,7 @@ fun MyReportsScreen(navController: NavController, studentId: String = "") {
     LaunchedEffect(Unit) {
         isLoading = true
         val cloudData = repo.fetchAllReports()
-        allUserReports = cloudData.filter { it.submittedBy == studentId }
+        allUserReports = cloudData.filter { it.submittedBy == studentId }.sortedByDescending { it.id }
         isLoading = false
     }
 

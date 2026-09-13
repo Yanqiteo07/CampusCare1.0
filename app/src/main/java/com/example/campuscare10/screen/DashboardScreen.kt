@@ -32,8 +32,10 @@ fun StudentDashboardScreen(
 
     LaunchedEffect(reports) {
         isLoading = true
-        val allReports = if (reports.isNotEmpty()) reports else repo.fetchAllReports()
-        reportList = allReports.filter { it.submittedBy == studentId }
+        // Fetch from database to get up-to-date and all records for this user
+        val allReports = repo.fetchAllReports()
+        // Filter by current student id and sort descending by id so latest reports appear first
+        reportList = allReports.filter { it.submittedBy == studentId }.sortedByDescending { it.id }
         isLoading = false
     }
 
