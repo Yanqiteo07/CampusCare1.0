@@ -1,6 +1,7 @@
 package com.example.campuscare10.screen
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -139,29 +140,35 @@ fun SubmitReportScreen(navController: NavController, studentId: String = "Unknow
         Button(
             onClick = {
                 scope.launch {
-                    var finalImageUrl: String? = null
+                    try {
+                        var finalImageUrl: String? = null
 
-                    if (photoUri != null) {
-                        photoUri?.let { nonNullUri ->
-                            finalImageUrl = repo.uploadImageToStorage(
-                                context = context,
-                                fileUri = nonNullUri
-                            )
+                        if (photoUri != null) {
+                            photoUri?.let { nonNullUri ->
+                                finalImageUrl = repo.uploadImageToStorage(
+                                    context = context,
+                                    fileUri = nonNullUri
+                                )
+                            }
                         }
-                    }
 
-                    val newReport = StaffReport(
-                        id = 0,
-                        category = selectedCategory,
-                        location = locationText,
-                        description = descText,
-                        submittedBy = studentId,
-                        status = "Submitted",
-                        imageUri = finalImageUrl,
-                        note = null
-                    )
-                    repo.insertNewReport(newReport)
-                    navController.popBackStack()
+                        val newReport = StaffReport(
+                            id = 0,
+                            category = selectedCategory,
+                            location = locationText,
+                            description = descText,
+                            submittedBy = studentId,
+                            status = "Submitted",
+                            imageUri = finalImageUrl,
+                            note = null
+                        )
+                        repo.insertNewReport(newReport)
+                        navController.popBackStack()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        // Optional: Add a toast message here to notify the user of the failure instead of crashing
+                        Toast.makeText(context, "Failed to submit report: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth().height(48.dp),

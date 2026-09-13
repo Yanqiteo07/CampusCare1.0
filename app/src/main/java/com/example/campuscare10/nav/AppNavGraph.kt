@@ -99,7 +99,12 @@ fun AppNavGraph(
         }
 
         composable("student_dashboard") {
-            StudentDashboardScreen(reports, navController, currentStudent?.studentName ?: "Student")
+            StudentDashboardScreen(
+                reports = reports,
+                navController = navController,
+                studentName = currentStudent?.studentName ?: "Student",
+                studentId = currentStudent?.studentId ?: ""
+            )
         }
 
         // Added route for Submitting a Report (referenced from student dashboard)
@@ -130,7 +135,7 @@ fun AppNavGraph(
         }
 
         composable("reports") {
-            MyReportsScreen(navController)
+            MyReportsScreen(navController, currentStudent?.studentId ?: "")
         }
 
         composable("equipment_list") {

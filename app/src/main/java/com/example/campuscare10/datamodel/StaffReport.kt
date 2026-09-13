@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class StaffReport(
-    val id: Int,
+    @SerialName("id") val id: Int = 0,
     val category: String = "",
     val location: String = "",
     val description: String = "",
     @SerialName("submitted_by") val submittedBy: String = "",
-    @SerialName("submitted_time") val submittedTime: String = "",
+    @SerialName("submitted_time") val submittedTime: String? = null,
     val status: String = "Under Review",
     val rating: Float = 0.0f,
     val note: String? = "",

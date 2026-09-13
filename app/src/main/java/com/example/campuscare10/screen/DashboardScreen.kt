@@ -16,32 +16,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.campuscare10.datamodel.StaffReport
+import com.example.campuscare10.datamodel.StudentProfiles
 import com.example.campuscare10.repository.ReportRepository
 
 @Composable
 fun StudentDashboardScreen(
     reports: List<StaffReport>,
     navController: NavController,
-    studentName: String = "Student" // Accepts student name dynamically
+    studentName: String = "Student",
+    studentId: String = ""
 ) {
     val repo = ReportRepository()
-    var reportList by remember { mutableStateOf(reports) }
+    var reportList by remember { mutableStateOf<List<StaffReport>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(reports) {
-        if (reports.isNotEmpty()) {
-            reportList = reports
-        } else {
-            isLoading = true
-            val allReports = repo.fetchAllReports()
-            reportList = allReports
-            isLoading = false
-        }
+        isLoading = true
+        val allReports = if (reports.isNotEmpty()) reports else repo.fetchAllReports()
+        reportList = allReports.filter { it.submittedBy == studentId }
+        isLoading = false
     }
 
     val total = reportList.size
     val inProgress = reportList.count { it.status == "In Progress" }
     val completed = reportList.count { it.status == "Completed" }
+
+
 
     Scaffold(
         bottomBar = {
@@ -129,7 +129,7 @@ fun StudentDashboardScreen(
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(
                         items = reportList,
-                        key = { it.id }
+                        key = { it.id}
                     ) { report ->
                         ReportRow(report = report, onClick = {
                             navController.navigate("detail/${report.id}")

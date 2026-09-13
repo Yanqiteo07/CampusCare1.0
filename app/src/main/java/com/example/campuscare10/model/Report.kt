@@ -15,7 +15,7 @@ data class Report(
     @SerialName("submitted_by")
     val submittedBy: String?,
     val status: String,
-    val rating: Float? = null,
+    val rating: Double? = null,
     val note: String? = null,
     @SerialName("image_uri")
     val imageUri: String?

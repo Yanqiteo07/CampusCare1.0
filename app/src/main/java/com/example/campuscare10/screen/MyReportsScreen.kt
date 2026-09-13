@@ -37,7 +37,7 @@ import com.example.campuscare10.datamodel.StaffReport
 import com.example.campuscare10.repository.ReportRepository
 
 @Composable
-fun MyReportsScreen(navController: NavController) {
+fun MyReportsScreen(navController: NavController, studentId: String = "") {
     val repo = ReportRepository()
     var allUserReports by remember { mutableStateOf<List<StaffReport>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -48,7 +48,7 @@ fun MyReportsScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         isLoading = true
         val cloudData = repo.fetchAllReports()
-        allUserReports = cloudData
+        allUserReports = cloudData.filter { it.submittedBy == studentId }
         isLoading = false
     }
 

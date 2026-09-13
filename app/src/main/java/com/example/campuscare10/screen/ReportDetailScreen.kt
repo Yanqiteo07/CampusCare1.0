@@ -79,7 +79,7 @@ fun ReportDetailScreen(
         DetailItem("Location", report.location)
         DetailItem("Description", report.description)
         DetailItem("Submitted by", report.submittedBy)
-        DetailItem("Submitted time", report.submittedTime)
+        DetailItem("Submitted time", report.submittedTime ?: "")
         DetailItem("Report ID", "#${report.id}")
         DetailItem("Category", report.category)
 
