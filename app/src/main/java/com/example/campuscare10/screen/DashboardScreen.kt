@@ -154,8 +154,8 @@ fun StudentDashboardScreen(
 fun StatCard(value: String, label: String, bg: Color) {
     Column(
         modifier = Modifier
-            .width(110.dp)
-            .height(110.dp)
+            .width(105.dp)
+            .height(105.dp)
             .background(bg, RoundedCornerShape(12.dp))
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
