@@ -59,7 +59,7 @@ fun StudentNotificationsScreen(navController: NavController) {
                     selected = true,
                     onClick = {},
                     icon = { Text("☰") },
-                    label = { Text("Alerts") }
+                    label = { Text("Equipment") }
                 )
                 NavigationBarItem(
                     selected = false,

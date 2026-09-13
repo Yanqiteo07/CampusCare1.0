@@ -96,7 +96,7 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
                         }
                     },
                     icon = { Text("☰") },
-                    label = { Text("Alerts") }
+                    label = { Text("Equipment") }
                 )
                 NavigationBarItem(
                     selected = true,
