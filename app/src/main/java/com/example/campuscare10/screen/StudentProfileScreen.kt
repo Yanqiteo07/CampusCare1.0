@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.campuscare10.datamodel.StudentProfiles
+import com.example.campuscare10.repository.ReportRepository // <-- Required for rating update
 import com.example.campuscare10.supabase.supabase
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
@@ -38,12 +39,21 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
     var isEditingPhone by remember { mutableStateOf(false) }
     var isUpdating by remember { mutableStateOf(false) }
 
-    // Fetch the latest profile data from Supabase to keep it in sync
+    // Fetch the latest profile data and sync rating from reports
     LaunchedEffect(Unit) {
         try {
+            val currentStudentId = student.studentId ?: ""
+
+            if (currentStudentId.isNotEmpty()) {
+                // 1. Recalculate and update total rating based on reports
+                val repo = ReportRepository()
+                repo.updateStudentRating(currentStudentId)
+            }
+
+            // 2. Fetch the latest profile data from Supabase to keep everything in sync
             val latestProfile = supabase.from("Studentprofiles")
                 .select {
-                    filter { eq("Studentid", student.studentId ?: "") }
+                    filter { eq("Studentid", currentStudentId) }
                 }.decodeSingleOrNull<StudentProfiles>()
 
             if (latestProfile != null) {
@@ -169,7 +179,6 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
                                             }) {
                                                 filter { eq("Studentid", studentDetails.studentId ?: "") }
                                             }
-                                            // Update local state object so it reflects immediately
                                             studentDetails = studentDetails.copy(phoneNumber = phoneNumber)
                                             isEditingPhone = false
                                             Toast.makeText(context, "Phone updated successfully", Toast.LENGTH_SHORT).show()

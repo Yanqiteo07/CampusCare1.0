@@ -29,7 +29,7 @@ fun StudentLoginScreen(
     val primaryPurple = Color(0xFF6C47FF)
     val backgroundTint = Color(0xFFF8F8FC)
 
-    var studentIdOrEmail by remember { mutableStateOf("") } // Renamed for clarity, handles both ID or Email
+    var studentIdOrEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var isStudentIdError by remember { mutableStateOf<String?>(null) }
