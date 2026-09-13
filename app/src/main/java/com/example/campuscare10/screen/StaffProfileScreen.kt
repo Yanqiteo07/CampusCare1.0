@@ -104,21 +104,6 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile, onLogo
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header with Back Button
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { 
-                    navController.navigate("staff_dashboard") { 
-                        popUpTo("staff_dashboard") { inclusive = true } 
-                    } 
-                }) {
-                    Text("‹", style = MaterialTheme.typography.headlineMedium, color = Color.Gray)
-                }
-                Text("Profile", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
-            }
-
             Spacer(modifier = Modifier.height(20.dp))
 
             Box(
@@ -137,7 +122,7 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile, onLogo
             Text(text = staffDetails.staffName ?: staffDetails.staffId, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Text(text = staffDetails.email ?: "No email provided", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
 
-            Spacer(modifier = Modifier.height(35.dp))
+            Spacer(modifier = Modifier.height(25.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -194,11 +179,7 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile, onLogo
                                 else Text("Save", fontSize = 12.sp)
                             }
                         } else {
-                            val displayPhone = if (phoneNumber.isBlank()) "Not provided" else phoneNumber
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(text = "Phone Number:", fontSize = 11.sp, color = Color.Gray)
-                                Text(text = displayPhone, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.DarkGray)
-                            }
+                            Text(text = "Phone Number: $phoneNumber", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                             IconButton(onClick = { isEditingPhone = true }) {
                                 Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit Phone", tint = primaryColor, modifier = Modifier.size(18.dp))
                             }
