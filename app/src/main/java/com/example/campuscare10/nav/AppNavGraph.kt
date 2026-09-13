@@ -147,14 +147,14 @@ fun AppNavGraph(
         }
 
         composable("equipment_detail/{equipmentId}") { entry ->
-            val equipmentId = entry.arguments?.getString("equipmentId")?.toLongOrNull()
+            val equipmentId = entry.arguments?.getString("equipmentId")
             if (equipmentId != null) {
                 EquipmentDetailScreen(navController, equipmentId)
             }
         }
 
         composable("edit_equipment/{equipmentId}") { entry ->
-            val equipmentId = entry.arguments?.getString("equipmentId")?.toLongOrNull()
+            val equipmentId = entry.arguments?.getString("equipmentId")
             if (equipmentId != null) {
                 EditEquipmentScreen(navController, equipmentId)
             }
