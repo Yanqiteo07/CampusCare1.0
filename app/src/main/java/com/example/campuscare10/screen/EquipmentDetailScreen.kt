@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EquipmentDetailScreen(
     navController: NavController,
-    equipmentId: Long
+    equipmentId: String
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()

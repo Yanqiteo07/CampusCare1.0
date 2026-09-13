@@ -163,7 +163,7 @@ fun EquipmentListScreen(
                 ) {
                     items(
                         items = filteredList,
-                        key = { it.id ?: 0L }
+                        key = { it.id ?: "" }
                     ) { equipment ->
                         EquipmentRow(
                         equipment = equipment,

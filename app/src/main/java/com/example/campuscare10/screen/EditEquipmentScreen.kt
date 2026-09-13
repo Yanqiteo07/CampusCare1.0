@@ -40,7 +40,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun EditEquipmentScreen(
     navController: NavController,
-    equipmentId: Long
+    equipmentId: String
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()

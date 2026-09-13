@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 
 @Serializable
 data class Equipment(
-    @SerialName("id") val id: Long? = null,
+    @SerialName("id") val id: String? = null,
     @SerialName("equipment_name") val equipmentName: String,
     @SerialName("category") val category: String,
     @SerialName("location") val location: String,
