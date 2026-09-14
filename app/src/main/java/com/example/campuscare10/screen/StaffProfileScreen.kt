@@ -55,7 +55,10 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile, onLogo
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = Color.White,
+                tonalElevation = 8.dp
+            ) {
                 NavigationBarItem(
                     selected = false,
                     onClick = {
@@ -188,7 +191,7 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile, onLogo
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(40.dp))
 
             if (!isEditingPhone) {
                 Button(
@@ -204,7 +207,7 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile, onLogo
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.campuscare10.datamodel.StudentProfiles
-import com.example.campuscare10.repository.ReportRepository // <-- Required for rating update
+import com.example.campuscare10.repository.ReportRepository
 import com.example.campuscare10.supabase.supabase
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
@@ -45,12 +45,11 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
             val currentStudentId = student.studentId ?: ""
 
             if (currentStudentId.isNotEmpty()) {
-                // 1. Recalculate and update total rating based on reports
                 val repo = ReportRepository()
                 repo.updateStudentRating(currentStudentId)
             }
 
-            // 2. Fetch the latest profile data from Supabase to keep everything in sync
+
             val latestProfile = supabase.from("Studentprofiles")
                 .select {
                     filter { eq("Studentid", currentStudentId) }
@@ -61,13 +60,16 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
                 phoneNumber = latestProfile.phoneNumber ?: ""
             }
         } catch (e: Exception) {
-            // Handle error silently or log
+
         }
     }
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = Color.White,
+                tonalElevation = 8.dp
+            ) {
                 NavigationBarItem(
                     selected = false,
                     onClick = {
@@ -110,7 +112,7 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding) // Safeguards content from overlapping with the bottom bar
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp),
@@ -206,7 +208,7 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(40.dp))
 
             if (!isEditingPhone) {
                 Button(
@@ -222,7 +224,7 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
