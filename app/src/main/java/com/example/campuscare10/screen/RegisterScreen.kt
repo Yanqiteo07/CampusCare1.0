@@ -43,7 +43,6 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Visibility states for passwords
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
@@ -52,13 +51,12 @@ fun RegisterScreen(
     var expanded by remember { mutableStateOf(false) }
     val departmentOptions = listOf("FOCS", "FISH", "FOBE", "FAFB", "FCCI", "FAHS")
 
-    // Error states for red frames
-    var usernameError by remember { mutableStateOf(false) }
-    var departmentError by remember { mutableStateOf(false) }
-    var emailError by remember { mutableStateOf(false) }
-    var contactNumberError by remember { mutableStateOf(false) }
-    var passwordError by remember { mutableStateOf(false) }
-    var confirmPasswordError by remember { mutableStateOf(false) }
+        var usernameErrorMsg by remember { mutableStateOf<String?>(null) }
+    var departmentErrorMsg by remember { mutableStateOf<String?>(null) }
+    var emailErrorMsg by remember { mutableStateOf<String?>(null) }
+    var contactErrorMsg by remember { mutableStateOf<String?>(null) }
+    var passwordErrorMsg by remember { mutableStateOf<String?>(null) }
+    var confirmPasswordErrorMsg by remember { mutableStateOf<String?>(null) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -81,7 +79,7 @@ fun RegisterScreen(
                 )
             }
 
-            // Scrollable Content Area
+
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -101,7 +99,6 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Error Message Banner
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage!!,
@@ -118,6 +115,8 @@ fun RegisterScreen(
                     onValueChange: (String) -> Unit,
                     icon: androidx.compose.ui.graphics.vector.ImageVector,
                     isError: Boolean = false,
+                    fieldErrorMsg: String? = null,
+                    helperText: String? = null,
                     keyboardType: KeyboardType = KeyboardType.Text,
                     isPassword: Boolean = false,
                     passwordVisibleState: Boolean = false,
@@ -169,18 +168,43 @@ fun RegisterScreen(
                                 .fillMaxWidth()
                                 .height(52.dp)
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        if (isError && !fieldErrorMsg.isNullOrBlank()) {
+                            Text(
+                                text = fieldErrorMsg,
+                                color = Color.Red,
+                                fontSize = 11.sp
+                            )
+                        } else if (!helperText.isNullOrBlank()) {
+                            Text(
+                                text = helperText,
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
 
-                RegisterTextField("Name", username, { username = it; usernameError = false }, Icons.Default.Person, isError = usernameError)
+                RegisterTextField(
+                    label = "Name",
+                    value = username,
+                    onValueChange = { username = it; usernameErrorMsg = null },
+                    icon = Icons.Default.Person,
+                    isError = usernameErrorMsg != null,
+                    fieldErrorMsg = usernameErrorMsg,
+                    helperText = "Enter your full legal name."
+                )
+
 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = "Department",
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.Bold,
-                            color = if (departmentError) Color.Red else Color.DarkGray,
+                            color = if (departmentErrorMsg != null) Color.Red else Color.DarkGray,
                             fontSize = 12.sp
                         )
                     )
@@ -195,10 +219,10 @@ fun RegisterScreen(
                             readOnly = true,
                             placeholder = { Text("Select your department...", color = Color.Gray, fontSize = 12.sp) },
                             leadingIcon = {
-                                Icon(imageVector = Icons.Default.Business, contentDescription = null, tint = if (departmentError) Color.Red else Color.Gray, modifier = Modifier.size(20.dp))
+                                Icon(imageVector = Icons.Default.Business, contentDescription = null, tint = if (departmentErrorMsg != null) Color.Red else Color.Gray, modifier = Modifier.size(20.dp))
                             },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                            isError = departmentError,
+                            isError = departmentErrorMsg != null,
                             shape = RoundedCornerShape(10.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = primaryPurple,
@@ -221,25 +245,53 @@ fun RegisterScreen(
                                     text = { Text(option) },
                                     onClick = {
                                         department = option
-                                        departmentError = false
+                                        departmentErrorMsg = null
                                         expanded = false
                                     }
                                 )
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    if (departmentErrorMsg != null) {
+                        Text(text = departmentErrorMsg!!, color = Color.Red, fontSize = 11.sp)
+                    } else {
+                        Text(text = "Choose your respective faculty/department.", color = Color.Gray, fontSize = 11.sp)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                RegisterTextField("Email Address", email, { email = it; emailError = false }, Icons.Default.Email, isError = emailError, keyboardType = KeyboardType.Email)
-                RegisterTextField("Contact Number", contactNumber, { if (it.length <= 11) { contactNumber = it; contactNumberError = false } }, Icons.Default.Phone, isError = contactNumberError, keyboardType = KeyboardType.Phone)
+                RegisterTextField(
+                    label = "Email Address",
+                    value = email,
+                    onValueChange = { email = it; emailErrorMsg = null },
+                    icon = Icons.Default.Email,
+                    isError = emailErrorMsg != null,
+                    fieldErrorMsg = emailErrorMsg,
+                    helperText = "Must match format: username@student.xxxx.edu.my",
+                    keyboardType = KeyboardType.Email
+                )
+
+                RegisterTextField(
+                    label = "Contact Number",
+                    value = contactNumber,
+                    onValueChange = { if (it.length <= 11) { contactNumber = it; contactErrorMsg = null } },
+                    icon = Icons.Default.Phone,
+                    isError = contactErrorMsg != null,
+                    fieldErrorMsg = contactErrorMsg,
+                    helperText = "Enter up to 11 digits (e.g., 01112345678).",
+                    keyboardType = KeyboardType.Phone
+                )
 
                 RegisterTextField(
                     label = "Password",
                     value = password,
-                    onValueChange = { password = it; passwordError = false },
+                    onValueChange = { password = it; passwordErrorMsg = null },
                     icon = Icons.Default.Lock,
-                    isError = passwordError,
+                    isError = passwordErrorMsg != null,
+                    fieldErrorMsg = passwordErrorMsg,
+                    helperText = "Must be at least 6 characters long.",
                     keyboardType = KeyboardType.Password,
                     isPassword = true,
                     passwordVisibleState = passwordVisible,
@@ -249,9 +301,11 @@ fun RegisterScreen(
                 RegisterTextField(
                     label = "Confirm Password",
                     value = confirmPassword,
-                    onValueChange = { confirmPassword = it; confirmPasswordError = false },
+                    onValueChange = { confirmPassword = it; confirmPasswordErrorMsg = null },
                     icon = Icons.Default.Lock,
-                    isError = confirmPasswordError,
+                    isError = confirmPasswordErrorMsg != null,
+                    fieldErrorMsg = confirmPasswordErrorMsg,
+                    helperText = "Re-enter your password to confirm.",
                     keyboardType = KeyboardType.Password,
                     isPassword = true,
                     passwordVisibleState = confirmPasswordVisible,
@@ -261,36 +315,54 @@ fun RegisterScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Fixed Bottom Register Button Container
             Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = {
-                    // Check conditions and flag individual fields with red borders
-                    usernameError = username.isBlank()
-                    departmentError = department.isBlank()
-                    emailError = email.isBlank()
-                    contactNumberError = contactNumber.isBlank() || contactNumber.length <= 11
-                    passwordError = password.isBlank()
-                    confirmPasswordError = confirmPassword.isBlank()
+                    var hasError = false
 
-                    if (usernameError || departmentError || emailError || contactNumberError || passwordError || confirmPasswordError) {
-                        errorMessage = "Please fill in all fields correctly!"
+                    if (username.isBlank()) {
+                        usernameErrorMsg = "Name cannot be empty!"
+                        hasError = true
+                    }
+                    if (department.isBlank()) {
+                        departmentErrorMsg = "Please select a department!"
+                        hasError = true
+                    }
+                    if (email.isBlank()) {
+                        emailErrorMsg = "Email cannot be empty!"
+                        hasError = true
+                    }
+                    if (contactNumber.isBlank() || contactNumber.length > 11) {
+                        contactErrorMsg = "Enter a valid contact number (max 11 digits)."
+                        hasError = true
+                    }
+                    if (password.isBlank() || password.length < 6) {
+                        passwordErrorMsg = "Password must be at least 6 characters."
+                        hasError = true
+                    }
+                    if (confirmPassword.isBlank()) {
+                        confirmPasswordErrorMsg = "Please confirm your password."
+                        hasError = true
+                    }
+
+                    if (hasError) {
+                        errorMessage = "Please fix the highlighted fields above."
                         return@Button
                     }
 
                     // Email format validation matching @student.xxxx.edu.my pattern
                     val studentEmailRegex = "^[A-Za-z0-9._%+-]+@student\\.[A-Za-z0-9-]+\\.edu\\.my$".toRegex()
                     if (!email.matches(studentEmailRegex)) {
-                        errorMessage = "Email must follow format: username@student.xxxx.edu.my"
-                        emailError = true
+                        emailErrorMsg = "Invalid format: username@student.xxxx.edu.my"
+                        errorMessage = "Please correct your student email format."
                         return@Button
                     }
 
                     // Check password match
                     if (password != confirmPassword) {
+                        passwordErrorMsg = "Passwords do not match."
+                        confirmPasswordErrorMsg = "Passwords do not match."
                         errorMessage = "Passwords do not match!"
-                        passwordError = true
-                        confirmPasswordError = true
                         return@Button
                     }
 
@@ -324,7 +396,7 @@ fun RegisterScreen(
                                 e.message?.contains("rate limit", ignoreCase = true) == true ->
                                     "Too many attempts! Please wait a few minutes."
                                 e.message?.contains("unique constraint") == true -> {
-                                    emailError = true
+                                    emailErrorMsg = "Email already registered!"
                                     "Email already registered!"
                                 }
                                 else -> "Registration failed: ${e.localizedMessage ?: "Please try again."}"
