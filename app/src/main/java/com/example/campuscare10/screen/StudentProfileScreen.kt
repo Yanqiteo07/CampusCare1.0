@@ -65,46 +65,48 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = Color.White,
-                tonalElevation = 8.dp
-            ) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        navController.navigate("student_dashboard") {
-                            popUpTo("student_profile") { inclusive = true }
-                        }
-                    },
-                    icon = { Text("⌂") },
-                    label = { Text("Home") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        navController.navigate("reports") {
-                            popUpTo("student_profile") { inclusive = true }
-                        }
-                    },
-                    icon = { Text("▤") },
-                    label = { Text("Reports") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        navController.navigate("student_notifications") {
-                            popUpTo("student_profile") { inclusive = true }
-                        }
-                    },
-                    icon = { Text("☰") },
-                    label = { Text("Equipment") }
-                )
-                NavigationBarItem(
-                    selected = true,
-                    onClick = {},
-                    icon = { Text("◉") },
-                    label = { Text("Profile") }
-                )
+            if (!isEditingPhone) {
+                NavigationBar(
+                    containerColor = Color.White,
+                    tonalElevation = 8.dp
+                ) {
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("student_dashboard") {
+                                popUpTo("student_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("⌂") },
+                        label = { Text("Home") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("reports") {
+                                popUpTo("student_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("▤") },
+                        label = { Text("Reports") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("student_notifications") {
+                                popUpTo("student_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("☰") },
+                        label = { Text("Equipment") }
+                    )
+                    NavigationBarItem(
+                        selected = true,
+                        onClick = {},
+                        icon = { Text("◉") },
+                        label = { Text("Profile") }
+                    )
+                }
             }
         }
     ) { padding ->

@@ -55,46 +55,48 @@ fun StaffProfileScreen(navController: NavController, staff: StaffProfile, onLogo
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = Color.White,
-                tonalElevation = 8.dp
-            ) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        navController.navigate("staff_dashboard") {
-                            popUpTo("staff_profile") { inclusive = true }
-                        }
-                    },
-                    icon = { Text("⌂") },
-                    label = { Text("Home") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        navController.navigate("staff_reports") {
-                            popUpTo("staff_profile") { inclusive = true }
-                        }
-                    },
-                    icon = { Text("▤") },
-                    label = { Text("Reports") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        navController.navigate("equipment_list") {
-                            popUpTo("staff_profile") { inclusive = true }
-                        }
-                    },
-                    icon = { Text("☰") },
-                    label = { Text("Equipment") }
-                )
-                NavigationBarItem(
-                    selected = true,
-                    onClick = {},
-                    icon = { Text("◉") },
-                    label = { Text("Profile") }
-                )
+            if (!isEditingPhone) {
+                NavigationBar(
+                    containerColor = Color.White,
+                    tonalElevation = 8.dp
+                ) {
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("staff_dashboard") {
+                                popUpTo("staff_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("⌂") },
+                        label = { Text("Home") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("staff_reports") {
+                                popUpTo("staff_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("▤") },
+                        label = { Text("Reports") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("equipment_list") {
+                                popUpTo("staff_profile") { inclusive = true }
+                            }
+                        },
+                        icon = { Text("☰") },
+                        label = { Text("Equipment") }
+                    )
+                    NavigationBarItem(
+                        selected = true,
+                        onClick = {},
+                        icon = { Text("◉") },
+                        label = { Text("Profile") }
+                    )
+                }
             }
         }
     ) { padding ->
