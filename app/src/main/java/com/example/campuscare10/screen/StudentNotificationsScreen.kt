@@ -2,6 +2,7 @@ package com.example.campuscare10.screen
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -104,7 +105,7 @@ fun StudentNotificationsScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(equipmentList) { equipment ->
-                        EquipmentUpdateCard(equipment = equipment, primaryColor = primaryColor)
+                        EquipmentUpdateCard(equipment = equipment, primaryColor = primaryColor, navController = navController)
                     }
                 }
             }
@@ -113,9 +114,13 @@ fun StudentNotificationsScreen(navController: NavController) {
 }
 
 @Composable
-fun EquipmentUpdateCard(equipment: Equipment, primaryColor: Color) {
+fun EquipmentUpdateCard(equipment: Equipment, primaryColor: Color, navController: NavController) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable{
+                navController.navigate("student_equipment_detail/${equipment.id}")
+            },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
