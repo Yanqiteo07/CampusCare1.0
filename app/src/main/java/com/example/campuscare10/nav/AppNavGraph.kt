@@ -124,6 +124,13 @@ fun AppNavGraph(
             StudentNotificationsScreen(navController)
         }
 
+        composable(route = "student_equipment_detail/{equipmentId}") { entry ->
+            val equipmentId = entry.arguments?.getString("equipmentId")
+            if (equipmentId != null) {
+                StudentEquipmentDetailScreen(navController, equipmentId)
+            }
+        }
+
         composable("staff_profile") {
             currentStaff?.let { staff ->
                 StaffProfileScreen(navController, staff, onLogout = { currentStaff = null })

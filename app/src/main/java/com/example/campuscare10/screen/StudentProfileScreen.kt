@@ -39,7 +39,7 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
     var isEditingPhone by remember { mutableStateOf(false) }
     var isUpdating by remember { mutableStateOf(false) }
 
-    // Fetch the latest profile data and sync rating from reports
+
     LaunchedEffect(Unit) {
         try {
             val currentStudentId = student.studentId ?: ""
@@ -48,7 +48,6 @@ fun StudentProfileScreen(navController: NavController, student: StudentProfiles,
                 val repo = ReportRepository()
                 repo.updateStudentRating(currentStudentId)
             }
-
 
             val latestProfile = supabase.from("Studentprofiles")
                 .select {
